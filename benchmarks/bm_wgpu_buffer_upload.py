@@ -23,6 +23,7 @@ def update_resource(resource):
 
 # Global device
 device = wgpu.gpu.request_adapter(power_preference="high-performance").request_device()
+print(device.adapter.summary)
 
 N = 100_000_000
 nchunks = 1000
@@ -242,7 +243,6 @@ def upload_wgpu_buffer_queue_write(math):
             assert False
 
         device.queue.submit([])  # bit of a hack to prevent weird wgpu-core error
-
         device._poll()  # Wait for GPU to finish queue
 
         yield
@@ -476,8 +476,8 @@ def upload_wgpu_buffer_get_mapped_range(math):
 
         encoder = device.create_command_encoder()
         encoder.copy_buffer_to_buffer(tmp_buffer, 0, storage_buffer, 0, N)
-        device.queue.submit([encoder.finish()])
 
+        device.queue.submit([encoder.finish()])
         device._poll()  # Wait for GPU to finish queue
 
         yield

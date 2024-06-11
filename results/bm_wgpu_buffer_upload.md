@@ -62,8 +62,16 @@ MacOS M1:
       up_wbuf_write_mapped_set (20x) - cpu: 21.08
 ```
 
+Win 11 laptop with NVIDIA GeForce RTX 2070:
+       up_wbuf_queue_write_set (20x) - cpu: 21.99
+         up_wbuf_with_data_set (20x) - cpu: 29.82
+      up_wbuf_write_mapped_set (20x) - cpu: 37.04
+```
+
 Interestingly, the `with_data` approach performs significantly worse.
-The `queue_write` method performs better (not a lot but consistently so).
+The `queue_write` method performs the best. On the M1 this is only a bit,
+but with a GeForce `write_mapped` performs quite bad. Would this be
+because the GPU has its own memory?
 
 
 ## Chunked
@@ -77,9 +85,17 @@ MacOS M1:
   up_wbuf_write_mapped_chunked (20x) - cpu: 24.46
 ```
 
+Win 11 laptop with NVIDIA GeForce RTX 2070:
+```
+   up_wbuf_queue_write_chunked (20x) - cpu: 46.45
+    up_wbuf_with_data_chuncked (20x) - cpu:102.97
+  up_wbuf_write_mapped_chunked (20x) - cpu: 52.69
+```
+
 We see the same bad performance of `with_data`. The `queue_write` approach is affected
-by looping over the chunks, processing them one by one. The `write_mapped` is definetly the fastest,
+by looping over the chunks, processing them one by one. On the M1 The `write_mapped` is definetly the fastest,
 because the buffer is still mapped/unmapped, and then copied as a whole.
+On the GeForce, just writing/copying data in chunks shows significant overhead, and the `queue_write` approach is still the fastest. With UHD Graphics the `write_mapped` is the fastest approach.
 
 
 ## Chuncked aligned
@@ -90,6 +106,13 @@ MacOS M1:
    up_wbuf_queue_write_aligned (20x) - cpu: 42.08
      up_wbuf_with_data_aligned (20x) - cpu: 97.67
   up_wbuf_write_mapped_aligned (20x) - cpu: 24.93
+```
+
+Win 11 laptop with NVIDIA GeForce RTX 2070:
+```
+   up_wbuf_queue_write_aligned (20x) - cpu: 51.66
+     up_wbuf_with_data_aligned (20x) - cpu:106.20
+  up_wbuf_write_mapped_aligned (20x) - cpu: 54.40
 ```
 
 
@@ -112,6 +135,17 @@ MacOS M1:
  up_wbuf_write_mapped_quarter3 (20x) - cpu:  6.78
 ```
 
+Win 11 laptop with NVIDIA GeForce RTX 2070:
+```
+  up_wbuf_queue_write_quarter1 (20x) - cpu:  8.53
+    up_wbuf_with_data_quarter1 (20x) - cpu: 12.33
+ up_wbuf_write_mapped_quarter1 (20x) - cpu: 10.31
+  up_wbuf_queue_write_quarter3 (20x) - cpu:  8.49
+    up_wbuf_with_data_quarter3 (20x) - cpu: 11.21
+ up_wbuf_write_mapped_quarter3 (20x) - cpu:  9.76
+```
+
+
 We can see that the performance increases about 4x, as can be expected.
 
 
@@ -126,6 +160,13 @@ MacOS M1:
        up_wbuf_queue_write_add (20x) - cpu: 31.01
       up_wbuf_write_mapped_add (20x) - cpu: 34.13
       up_wbuf_mapped_range_add (20x) - cpu: 23.74
+```
+
+Win 11 laptop with NVIDIA GeForce RTX 2070:
+```
+       up_wbuf_queue_write_add (20x) - cpu:108.55
+      up_wbuf_write_mapped_add (20x) - cpu:124.42
+      up_wbuf_mapped_range_add (20x) - cpu: 94.66
 ```
 
 It can be seen that adding the data affects the performance of the `queue_write`  and `write_mapped` approaches.
@@ -146,6 +187,12 @@ MacOS M1:
   up_wbuf_mapped_range_masked2 (20x) - cpu:481.81
 ```
 
+Win 11 laptop with NVIDIA GeForce RTX 2070:
+```
+   up_wbuf_mapped_range_inter2 (20x) - cpu: 75.49
+  up_wbuf_mapped_range_masked2 (20x) - cpu:731.32
+```
+
 This shows that tricks like this don't help at all. We're much better off by
 just uploading the whole array. Very good to know though!
 
@@ -164,7 +211,6 @@ Maybe enough to pubicly expose it in wgpu, but no use in pygfx.
 The `queue.write_buffer()` is the fastest approach to set a whole buffer,
 but takes a hit when chunking is applied.
 
-The `queue.write_mapped()` provides a flexible approach that likely performs better
-when chunking is applied.
+The `queue.write_mapped()` provides a flexible approach that - on some devices - performs better when chunking is applied.
 
 
