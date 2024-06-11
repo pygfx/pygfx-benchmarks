@@ -63,6 +63,7 @@ MacOS M1:
 ```
 
 Win 11 laptop with NVIDIA GeForce RTX 2070:
+```
        up_wbuf_queue_write_set (20x) - cpu: 21.99
          up_wbuf_with_data_set (20x) - cpu: 29.82
       up_wbuf_write_mapped_set (20x) - cpu: 37.04
