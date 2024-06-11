@@ -68,10 +68,17 @@ Win 11 laptop with NVIDIA GeForce RTX 2070:
       up_wbuf_write_mapped_set (20x) - cpu: 37.04
 ```
 
+Ubuntu 22.04 with Intel(R) UHD Graphics 730:
+```
+       up_wbuf_queue_write_set (20x) - cpu: 28.79
+         up_wbuf_with_data_set (20x) - cpu: 67.87
+      up_wbuf_write_mapped_set (20x) - cpu: 49.17
+```
+
 Interestingly, the `with_data` approach performs significantly worse.
 The `queue_write` method performs the best. On the M1 this is only a bit,
-but with a GeForce `write_mapped` performs quite bad. Would this be
-because the GPU has its own memory?
+but with GeForce or Intel Graphics `write_mapped` performs quite bad. For the GPU I imagine it's
+because it has its own memory. But for integrated graphics?
 
 
 ## Chunked
@@ -92,10 +99,20 @@ Win 11 laptop with NVIDIA GeForce RTX 2070:
   up_wbuf_write_mapped_chunked (20x) - cpu: 52.69
 ```
 
+Ubuntu 22.04 with Intel(R) UHD Graphics 730:
+```
+   up_wbuf_queue_write_chunked (20x) - cpu: 45.71
+    up_wbuf_with_data_chuncked (20x) - cpu:118.22
+  up_wbuf_write_mapped_chunked (20x) - cpu: 51.74
+```
+
 We see the same bad performance of `with_data`. The `queue_write` approach is affected
 by looping over the chunks, processing them one by one. On the M1 The `write_mapped` is definetly the fastest,
 because the buffer is still mapped/unmapped, and then copied as a whole.
-On the GeForce, just writing/copying data in chunks shows significant overhead, and the `queue_write` approach is still the fastest. With UHD Graphics the `write_mapped` is the fastest approach.
+
+On the GeForce, just writing/copying data in chunks shows significant overhead, and the `queue_write` approach is still the fastest. With UHD Graphics on the same laptop, the `write_mapped` is the fastest approach.
+
+With UHD Graphics on a different machine, the numbers are close to that of the GeForce.
 
 
 ## Chuncked aligned
@@ -115,8 +132,16 @@ Win 11 laptop with NVIDIA GeForce RTX 2070:
   up_wbuf_write_mapped_aligned (20x) - cpu: 54.40
 ```
 
+Ubuntu 22.04 with Intel(R) UHD Graphics 730:
+```
+   up_wbuf_queue_write_aligned (20x) - cpu: 45.17
+     up_wbuf_with_data_aligned (20x) - cpu:119.45
+  up_wbuf_write_mapped_aligned (20x) - cpu: 55.51
+```
+
 
 This shows that aligning by page size does not seem to affect performance.
+
 
 ## Quarter
 
@@ -145,8 +170,19 @@ Win 11 laptop with NVIDIA GeForce RTX 2070:
  up_wbuf_write_mapped_quarter3 (20x) - cpu:  9.76
 ```
 
+Ubuntu 22.04 with Intel(R) UHD Graphics 730:
+```
+  up_wbuf_queue_write_quarter1 (20x) - cpu: 16.02
+    up_wbuf_with_data_quarter1 (20x) - cpu: 24.13
+ up_wbuf_write_mapped_quarter1 (20x) - cpu: 10.76
+  up_wbuf_queue_write_quarter3 (20x) - cpu:  8.47
+    up_wbuf_with_data_quarter3 (20x) - cpu: 17.73
+ up_wbuf_write_mapped_quarter3 (20x) - cpu: 18.25
+```
 
 We can see that the performance increases about 4x, as can be expected.
+
+The UHD Graphics on Ubuntu scales less good, and the numbers vary more with each run.
 
 
 ## Setting data to a computation result
@@ -169,8 +205,18 @@ Win 11 laptop with NVIDIA GeForce RTX 2070:
       up_wbuf_mapped_range_add (20x) - cpu: 94.66
 ```
 
+Ubuntu 22.04 with Intel(R) UHD Graphics 730:
+```
+       up_wbuf_queue_write_add (20x) - cpu: 55.24
+      up_wbuf_write_mapped_add (20x) - cpu: 84.69
+      up_wbuf_mapped_range_add (20x) - cpu: 56.56
+```
+
+
 It can be seen that adding the data affects the performance of the `queue_write`  and `write_mapped` approaches.
 The performance of `mapped_range` is significantly better because it avoids a data copy.
+
+On the results measured with Intel Graphics on Ubuntu, the advantage is negligible.
 
 This case is somewhat of a niche, but people in this niche probably care about performance to
 be able to want to apply this approach ...
@@ -191,6 +237,12 @@ Win 11 laptop with NVIDIA GeForce RTX 2070:
 ```
    up_wbuf_mapped_range_inter2 (20x) - cpu: 75.49
   up_wbuf_mapped_range_masked2 (20x) - cpu:731.32
+```
+
+Ubuntu 22.04 with Intel(R) UHD Graphics 730:
+```
+   up_wbuf_mapped_range_inter2 (20x) - cpu: 62.48
+  up_wbuf_mapped_range_masked2 (20x) - cpu:533.96
 ```
 
 This shows that tricks like this don't help at all. We're much better off by
