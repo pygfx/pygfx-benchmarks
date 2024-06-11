@@ -75,10 +75,20 @@ Ubuntu 22.04 with Intel(R) UHD Graphics 730:
       up_wbuf_write_mapped_set (20x) - cpu: 49.17
 ```
 
-Interestingly, the `with_data` approach performs significantly worse.
-The `queue_write` method performs the best. On the M1 this is only a bit,
-but with GeForce or Intel Graphics `write_mapped` performs quite bad. For the GPU I imagine it's
-because it has its own memory. But for integrated graphics?
+Win 11 with Intel(R) UHD Graphics 730:
+```
+       up_wbuf_queue_write_set (20x) - cpu: 21.68
+         up_wbuf_with_data_set (20x) - cpu: 40.91
+      up_wbuf_write_mapped_set (20x) - cpu: 27.80
+```
+
+Interestingly, the `with_data` approach consistently performs significantly worse.
+
+The `queue_write` method performs the best on all devices.
+
+On GeForce the `write_mapped` performs quite bad. I imagine it's
+because it has its own memory. For UHD graphics I see a similar trend, although
+it differs a bit per device.
 
 
 ## Chunked
@@ -106,13 +116,21 @@ Ubuntu 22.04 with Intel(R) UHD Graphics 730:
   up_wbuf_write_mapped_chunked (20x) - cpu: 51.74
 ```
 
-We see the same bad performance of `with_data`. The `queue_write` approach is affected
-by looping over the chunks, processing them one by one. On the M1 The `write_mapped` is definetly the fastest,
+Win 11 with Intel(R) UHD Graphics 730:
+```
+   up_wbuf_queue_write_chunked (20x) - cpu: 33.75
+    up_wbuf_with_data_chuncked (20x) - cpu: 66.37
+  up_wbuf_write_mapped_chunked (20x) - cpu: 29.61
+```
+
+We see the same bad performance of `with_data`.
+
+The `queue_write` approach is affected
+by looping over the chunks, processing them one by one.
+
+On the M1 The `write_mapped` is definetly the fastest,
 because the buffer is still mapped/unmapped, and then copied as a whole.
-
-On the GeForce, just writing/copying data in chunks shows significant overhead, and the `queue_write` approach is still the fastest. With UHD Graphics on the same laptop, the `write_mapped` is the fastest approach.
-
-With UHD Graphics on a different machine, the numbers are close to that of the GeForce.
+On the GeForce, the same approach approach erforms bad, suggesting that piece being copied comes with significant overhead. The `queue_write` approach is still the fastest in this case. For UHD graphics the `write_mapped` approach may or may not be faster, depending on the device.
 
 
 ## Chuncked aligned
@@ -139,6 +157,12 @@ Ubuntu 22.04 with Intel(R) UHD Graphics 730:
   up_wbuf_write_mapped_aligned (20x) - cpu: 55.51
 ```
 
+Win 11 with Intel(R) UHD Graphics 730:
+```
+   up_wbuf_queue_write_aligned (20x) - cpu: 28.72
+     up_wbuf_with_data_aligned (20x) - cpu: 87.37
+  up_wbuf_write_mapped_aligned (20x) - cpu: 32.46
+```
 
 This shows that aligning by page size does not seem to affect performance.
 
@@ -180,6 +204,16 @@ Ubuntu 22.04 with Intel(R) UHD Graphics 730:
  up_wbuf_write_mapped_quarter3 (20x) - cpu: 18.25
 ```
 
+Win 11 with Intel(R) UHD Graphics 730:
+```
+  up_wbuf_queue_write_quarter1 (20x) - cpu:  5.90
+    up_wbuf_with_data_quarter1 (20x) - cpu: 10.25
+ up_wbuf_write_mapped_quarter1 (20x) - cpu:  7.33
+  up_wbuf_queue_write_quarter3 (20x) - cpu:  6.19
+    up_wbuf_with_data_quarter3 (20x) - cpu:  9.91
+ up_wbuf_write_mapped_quarter3 (20x) - cpu:  7.20
+```
+
 We can see that the performance increases about 4x, as can be expected.
 
 The UHD Graphics on Ubuntu scales less good, and the numbers vary more with each run.
@@ -212,11 +246,18 @@ Ubuntu 22.04 with Intel(R) UHD Graphics 730:
       up_wbuf_mapped_range_add (20x) - cpu: 56.56
 ```
 
+Win 11 with Intel(R) UHD Graphics 730:
+```
+       up_wbuf_queue_write_add (20x) - cpu: 67.74
+      up_wbuf_write_mapped_add (20x) - cpu: 73.20
+      up_wbuf_mapped_range_add (20x) - cpu: 48.23
+```
+
 
 It can be seen that adding the data affects the performance of the `queue_write`  and `write_mapped` approaches.
 The performance of `mapped_range` is significantly better because it avoids a data copy.
 
-On the results measured with Intel Graphics on Ubuntu, the advantage is negligible.
+On the results measured with Intel Graphics on Ubuntu, the advantage is negligible. Other devices with UHD show the same trend as the M1 and GeForce.
 
 This case is somewhat of a niche, but people in this niche probably care about performance to
 be able to want to apply this approach ...
@@ -245,24 +286,25 @@ Ubuntu 22.04 with Intel(R) UHD Graphics 730:
   up_wbuf_mapped_range_masked2 (20x) - cpu:533.96
 ```
 
+Win 11 with Intel(R) UHD Graphics 730:
+```
+   up_wbuf_mapped_range_inter2 (20x) - cpu: 37.11
+  up_wbuf_mapped_range_masked2 (20x) - cpu:497.01
+```
+
 This shows that tricks like this don't help at all. We're much better off by
 just uploading the whole array. Very good to know though!
 
 
 ## Summary
 
-NEEDS MORE TESTS ON OTHER MACHINES
-
 The `device.create_buffer_with_data()` method, and its sibling
-`device.create_buffer(.., mapped_at_creation=True)` are somehow quite slow.
+`device.create_buffer(.., mapped_at_creation=True)` are somehow quite slow. Let's avoid these.
 
 The `buffer._experimental_get_mapped_range()` method does not help, except for the
 niche case of using it for the target of a computation: `np.something(out=mapped_array)`.
 Maybe enough to pubicly expose it in wgpu, but no use in pygfx.
 
 The `queue.write_buffer()` is the fastest approach to set a whole buffer,
-but takes a hit when chunking is applied.
-
-The `queue.write_mapped()` provides a flexible approach that - on some devices - performs better when chunking is applied.
-
-
+but takes a hit when chunking is applied. Depening on hardware and chunk size,
+it may be faster to use  `buffer.write_mapped()`.
