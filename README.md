@@ -42,8 +42,3 @@ def my_benchmark(canvas):
 ```
 
 See [bm_example.py](benchmarks/bm_example.py) for a functioning example.
-
-
-## Observations
-
-* [bm_points](results/bm_points.md)

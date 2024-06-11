@@ -34,10 +34,11 @@ def benchmark_points(canvas, n_objects, n_verts):
 
     while True:
         canvas._draw_frame_and_present()  # includes time to take screenshot
-        yield #renderer.stats["gpu_times"]
+        yield  # renderer.stats["gpu_times"]
 
 
 # A couple of measurements of 100k points, divided over multiple objects
+
 
 @benchmark
 def benchmark_points_1_100k(canvas):
@@ -59,6 +60,7 @@ def benchmark_points_1000_100(canvas):
 
 # A simple case, and a case of drawing 1M
 
+
 @benchmark
 def benchmark_points_10_10(canvas):
     # 10 points objects with 10 points each
@@ -74,5 +76,5 @@ def benchmark_points_1_1m(canvas):
 if __name__ == "__main__":
     from wgpu.gui.auto import WgpuCanvas
 
-    c = None#WgpuCanvas()
+    c = None  # WgpuCanvas()
     run_all(globals(), c)

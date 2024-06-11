@@ -10,14 +10,12 @@ def my_benchmark(canvas):
 
     yield  # done setting things up
 
-
     while True:
 
         # Do something that takes time
         time.sleep(0.01)
 
         yield  # measurement point
-
 
 
 if __name__ == "__main__":
