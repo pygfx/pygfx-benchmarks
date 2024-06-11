@@ -11,7 +11,7 @@ Their purpose include:
 * To make informed decisions in pygfx and other libraries.
 * To track performance of pygfx logic, so that the effect of changes on performance can be measured.
 
-Scripts go into the `benchmarks` folder. Matchinhg results go into the `results` folder.
+Scripts go into the [benchmarks](benchmarks/) folder. Matching results go into the [results](results/) folder.
 
 
 ## Writing a benchmark
@@ -46,4 +46,4 @@ See [bm_example.py](benchmarks/bm_example.py) for a functioning example.
 
 ## Observations
 
-* ...
+* [bm_points](results/bm_points.md)
