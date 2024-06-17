@@ -194,6 +194,10 @@ def up_wbuf_mapped_range_inter2(canvas):
 
 
 @benchmark(20)
+def up_wbuf_mapped_range_inter2_alt(canvas):
+    return upload_wgpu_buffer_get_mapped_range("inter2_alt")
+
+@benchmark(20)
 def up_wbuf_mapped_range_masked2(canvas):
     return upload_wgpu_buffer_get_mapped_range("masked2")
 
