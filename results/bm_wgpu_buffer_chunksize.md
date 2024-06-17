@@ -92,8 +92,35 @@ Apple M1 Pro (IntegratedGPU) via Metal
     up_wbuf_write_mapped_15_15 (20x) - cpu:  1.36
 ```
 
+```
+Intel(R) UHD Graphics 730 (ADL-S GT1) (IntegratedGPU) via Vulkan
+      up_wbuf_queue_write_15_6 (20x) - cpu: 10.79
+      up_wbuf_queue_write_15_7 (20x) - cpu:  6.60
+      up_wbuf_queue_write_15_8 (20x) - cpu:  3.81
+      up_wbuf_queue_write_15_9 (20x) - cpu:  2.25
+     up_wbuf_queue_write_15_10 (20x) - cpu:  1.54
+     up_wbuf_queue_write_15_11 (20x) - cpu:  1.05
+     up_wbuf_queue_write_15_12 (20x) - cpu:  0.65
+     up_wbuf_queue_write_15_13 (20x) - cpu:  0.52
+     up_wbuf_queue_write_15_14 (20x) - cpu:  0.49
+     up_wbuf_queue_write_15_15 (20x) - cpu:  0.
+
+     up_wbuf_write_mapped_15_6 (20x) - cpu:  1.36
+     up_wbuf_write_mapped_15_7 (20x) - cpu:  1.24
+     up_wbuf_write_mapped_15_8 (20x) - cpu:  0.96
+     up_wbuf_write_mapped_15_9 (20x) - cpu:  0.94
+    up_wbuf_write_mapped_15_10 (20x) - cpu:  0.85
+    up_wbuf_write_mapped_15_11 (20x) - cpu:  0.70
+    up_wbuf_write_mapped_15_12 (20x) - cpu:  0.69
+    up_wbuf_write_mapped_15_13 (20x) - cpu:  0.60
+    up_wbuf_write_mapped_15_14 (20x) - cpu:  0.54
+    up_wbuf_write_mapped_15_15 (20x) - cpu:  0.40
+```
+
 On a Mac, the tipping point is at about 2**12 for queue_write,
 and at 2**8 for write_mapped.
+
+Tipping point is very similar for Ubuntu UHD Graphics.
 
 ### With a 1 MiB (2**20) buffer
 ```
@@ -119,9 +146,33 @@ Apple M1 Pro (IntegratedGPU) via Metal
     up_wbuf_write_mapped_20_18 (20x) - cpu:  1.59
 ```
 
+```
+Intel(R) UHD Graphics 730 (ADL-S GT1) (IntegratedGPU) via Vulkan
+     up_wbuf_queue_write_20_10 (20x) - cpu: 17.52
+     up_wbuf_queue_write_20_11 (20x) - cpu: 14.02
+     up_wbuf_queue_write_20_12 (20x) - cpu:  8.46
+     up_wbuf_queue_write_20_13 (20x) - cpu:  3.27
+     up_wbuf_queue_write_20_14 (20x) - cpu:  2.47
+     up_wbuf_queue_write_20_15 (20x) - cpu:  1.94
+     up_wbuf_queue_write_20_16 (20x) - cpu:  1.51
+     up_wbuf_queue_write_20_17 (20x) - cpu:  1.82
+     up_wbuf_queue_write_20_18 (20x) - cpu:  1.51
+     up_wbuf_queue_write_20_19 (20x) - cpu:  0.99
+
+    up_wbuf_write_mapped_20_10 (20x) - cpu:  3.27
+    up_wbuf_write_mapped_20_11 (20x) - cpu:  2.33
+    up_wbuf_write_mapped_20_12 (20x) - cpu:  1.92
+    up_wbuf_write_mapped_20_13 (20x) - cpu:  1.86
+    up_wbuf_write_mapped_20_14 (20x) - cpu:  1.72
+    up_wbuf_write_mapped_20_15 (20x) - cpu:  1.61
+    up_wbuf_write_mapped_20_16 (20x) - cpu:  1.33
+    up_wbuf_write_mapped_20_17 (20x) - cpu:  1.54
+```
+
 On a Mac, the tipping point is at about 2**18 for queue_write,
 and at 2**14 for write_mapped.
 
+For Ubuntu UHD Graphics the tipping point seems about 2**16.
 
 
 ### With a 32 MiB (2**25) byte buffer
@@ -150,10 +201,35 @@ Apple M1 Pro (IntegratedGPU) via Metal
     up_wbuf_write_mapped_25_21 (20x) - cpu:  8.33
 ```
 
+```
+Intel(R) UHD Graphics 730 (ADL-S GT1) (IntegratedGPU) via Vulkan
+     up_wbuf_queue_write_25_12 (20x) - cpu: 80.43
+     up_wbuf_queue_write_25_13 (20x) - cpu: 51.70
+     up_wbuf_queue_write_25_14 (20x) - cpu: 33.70
+     up_wbuf_queue_write_25_15 (20x) - cpu: 35.53
+     up_wbuf_queue_write_25_16 (20x) - cpu: 27.94
+     up_wbuf_queue_write_25_17 (20x) - cpu: 23.43
+     up_wbuf_queue_write_25_18 (20x) - cpu: 24.20
+     up_wbuf_queue_write_25_19 (20x) - cpu: 16.52
+     up_wbuf_queue_write_25_20 (20x) - cpu: 20.06
+     up_wbuf_queue_write_25_21 (20x) - cpu: 17.88
+
+    up_wbuf_write_mapped_25_12 (20x) - cpu: 36.17
+    up_wbuf_write_mapped_25_13 (20x) - cpu: 26.88
+    up_wbuf_write_mapped_25_14 (20x) - cpu: 22.83
+    up_wbuf_write_mapped_25_15 (20x) - cpu: 20.90
+    up_wbuf_write_mapped_25_16 (20x) - cpu: 19.70
+    up_wbuf_write_mapped_25_17 (20x) - cpu: 21.37
+    up_wbuf_write_mapped_25_18 (20x) - cpu: 23.45
+    up_wbuf_write_mapped_25_19 (20x) - cpu: 22.21
+    up_wbuf_write_mapped_25_20 (20x) - cpu: 21.53
+    up_wbuf_write_mapped_25_21 (20x) - cpu: 20.16
+```
 
 On a Mac, the tipping point is at about 2**20 for queue_write,
 and at 2**16 for write_mapped.
 
+Slightly later tipping points for Ubuntu UHD Graphics.
 
 
 ### With a 256 MiB (2**28) byte buffer
@@ -183,7 +259,32 @@ Apple M1 Pro (IntegratedGPU) via Metal
     up_wbuf_write_mapped_28_23 (20x) - cpu: 56.93
 ```
 
-Similar results.
+```
+Intel(R) UHD Graphics 730 (ADL-S GT1) (IntegratedGPU) via Vulkan
+     up_wbuf_queue_write_28_14 (20x) - cpu:224.98
+     up_wbuf_queue_write_28_15 (20x) - cpu:176.20
+     up_wbuf_queue_write_28_16 (20x) - cpu:146.73
+     up_wbuf_queue_write_28_17 (20x) - cpu:131.03
+     up_wbuf_queue_write_28_18 (20x) - cpu:123.72
+     up_wbuf_queue_write_28_19 (20x) - cpu: 99.38
+     up_wbuf_queue_write_28_20 (20x) - cpu: 94.75
+     up_wbuf_queue_write_28_21 (20x) - cpu: 92.15
+     up_wbuf_queue_write_28_22 (20x) - cpu: 93.36
+     up_wbuf_queue_write_28_23 (20x) - cpu: 93.66
+
+    up_wbuf_write_mapped_28_14 (20x) - cpu:180.33
+    up_wbuf_write_mapped_28_15 (20x) - cpu:151.85
+    up_wbuf_write_mapped_28_16 (20x) - cpu:142.36
+    up_wbuf_write_mapped_28_17 (20x) - cpu:133.49
+    up_wbuf_write_mapped_28_18 (20x) - cpu:136.33
+    up_wbuf_write_mapped_28_19 (20x) - cpu:134.76
+    up_wbuf_write_mapped_28_20 (20x) - cpu:131.60
+    up_wbuf_write_mapped_28_21 (20x) - cpu:134.31
+    up_wbuf_write_mapped_28_22 (20x) - cpu:131.91
+    up_wbuf_write_mapped_28_23 (20x) - cpu:132.09
+```
+
+Similar results, tipping point at about 2**20.
 
 
 ### With a 1GiB (2**30) byte buffer
@@ -220,8 +321,38 @@ Apple M1 Pro (IntegratedGPU) via Metal
     up_wbuf_write_mapped_30_30 (20x) - cpu:274.61
 ```
 
+Intel(R) UHD Graphics 730 (ADL-S GT1) (IntegratedGPU) via Vulkan
+     up_wbuf_queue_write_30_17 (20x) - cpu:562.52
+     up_wbuf_queue_write_30_18 (20x) - cpu:536.70
+     up_wbuf_queue_write_30_19 (20x) - cpu:444.95
+     up_wbuf_queue_write_30_20 (20x) - cpu:419.46
+     up_wbuf_queue_write_30_21 (20x) - cpu:411.49
+     up_wbuf_queue_write_30_22 (20x) - cpu:401.99
+     up_wbuf_queue_write_30_23 (20x) - cpu:401.53
+     up_wbuf_queue_write_30_24 (20x) - cpu:399.19
+     up_wbuf_queue_write_30_25 (20x) - cpu:405.48
+     up_wbuf_queue_write_30_26 (20x) - cpu:404.52
+     up_wbuf_queue_write_30_27 (20x) - cpu:432.56
+     up_wbuf_queue_write_30_28 (20x) - cpu:436.43
+     up_wbuf_queue_write_30_29 (20x) - cpu:435.96
+
+    up_wbuf_write_mapped_30_17 (20x) - cpu:502.51
+    up_wbuf_write_mapped_30_18 (20x) - cpu:499.30
+    up_wbuf_write_mapped_30_19 (20x) - cpu:498.91
+    up_wbuf_write_mapped_30_20 (20x) - cpu:498.66
+    up_wbuf_write_mapped_30_21 (20x) - cpu:496.82
+    up_wbuf_write_mapped_30_22 (20x) - cpu:494.74
+    up_wbuf_write_mapped_30_23 (20x) - cpu:493.73
+    up_wbuf_write_mapped_30_24 (20x) - cpu:491.87
+    up_wbuf_write_mapped_30_25 (20x) - cpu:492.06
+    up_wbuf_write_mapped_30_26 (20x) - cpu:494.25
+    up_wbuf_write_mapped_30_27 (20x) - cpu:492.19
+    up_wbuf_write_mapped_30_28 (20x) - cpu:490.46
+    up_wbuf_write_mapped_30_29 (20x) - cpu:490.21
+
+
 On a Mac, the tipping point is at about 2**21 for queue_write,
-and at 2**19 for write_mapped.
+and at 2**19 for write_mapped. Similar tipping points for Ubuntu UHD Graphics.
 
 Also interesting is that with the 1GB buffer, uploading the full buffer
 takes longer (consistently) for queue_write. So chunking, even if not needed, can be beneficial as well!

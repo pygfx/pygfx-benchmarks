@@ -133,8 +133,8 @@ if __name__ == "__main__":
     # run_benchmarks(up_wbuf_queue_write, 25, 12, 22)
     # run_benchmarks(up_wbuf_write_mapped, 25, 12, 22)
 
-    run_benchmarks(up_wbuf_queue_write, 28, 14, 24)
-    run_benchmarks(up_wbuf_write_mapped, 28, 14, 24)
+    # run_benchmarks(up_wbuf_queue_write, 28, 14, 24)
+    # run_benchmarks(up_wbuf_write_mapped, 28, 14, 24)
 
     # run_benchmarks(up_wbuf_queue_write, 30, 17, 30)
     # run_benchmarks(up_wbuf_write_mapped, 30, 17, 30)
