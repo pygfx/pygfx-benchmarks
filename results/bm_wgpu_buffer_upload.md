@@ -258,7 +258,8 @@ Win 11 with Intel(R) UHD Graphics 730:
 It can be seen that adding the data affects the performance of the `queue_write`  and `write_mapped` approaches.
 The performance of `mapped_range` is significantly better because it avoids a data copy.
 
-On the results measured with Intel Graphics on Ubuntu, the advantage is negligible. Other devices with UHD show the same trend as the M1 and GeForce.
+On the results measured with Intel Graphics on Ubuntu, the advantage is negligible.
+Other devices with UHD show the same trend as the M1 and GeForce.
 
 This case is somewhat of a niche, but people in this niche probably care about performance to
 be able to want to apply this approach ...
@@ -282,7 +283,10 @@ MacOS M1:
 
 Win 11 laptop with NVIDIA GeForce RTX 2070:
 ```
- up_wbuf_mapped_range_noncont_both (20x) - cpu: 75.49
+   up_wbuf_queue_write_noncont_src (20x) - cpu:106.98
+  up_wbuf_mapped_range_noncont_src (20x) - cpu: 89.95
+  up_wbuf_mapped_range_noncont_dst (20x) - cpu:103.80
+ up_wbuf_mapped_range_noncont_both (20x) - cpu: 75.87
       up_wbuf_mapped_range_masked2 (20x) - cpu:731.32
 ```
 
@@ -306,6 +310,8 @@ than with a contiguous array.
 This also shows that indexing tricks to reduce the amount of data being uploaded
 don't help at all. Using a mask is even worce. We'd be much better off by
 just uploading the whole array.
+
+The extra overhead is particularly bad on dedicated GPU's.
 
 This is very valuable info. It means we can forget about fancy syncing scemes,
 and can stick to an efficient chunking mechanic.

@@ -93,6 +93,31 @@ Apple M1 Pro (IntegratedGPU) via Metal
 ```
 
 ```
+NVIDIA GeForce RTX 2070 with Max-Q Design (DiscreteGPU) via Vulkan
+      up_wbuf_queue_write_15_6 (20x) - cpu:  8.38
+      up_wbuf_queue_write_15_7 (20x) - cpu:  4.29
+      up_wbuf_queue_write_15_8 (20x) - cpu:  2.47
+      up_wbuf_queue_write_15_9 (20x) - cpu:  1.51
+     up_wbuf_queue_write_15_10 (20x) - cpu:  1.00
+     up_wbuf_queue_write_15_11 (20x) - cpu:  0.68
+     up_wbuf_queue_write_15_12 (20x) - cpu:  0.52
+     up_wbuf_queue_write_15_13 (20x) - cpu:  0.42
+     up_wbuf_queue_write_15_14 (20x) - cpu:  0.36
+     up_wbuf_queue_write_15_15 (20x) - cpu:  0.32
+
+     up_wbuf_write_mapped_15_6 (20x) - cpu:  2.26
+     up_wbuf_write_mapped_15_7 (20x) - cpu:  1.55
+     up_wbuf_write_mapped_15_8 (20x) - cpu:  1.00
+     up_wbuf_write_mapped_15_9 (20x) - cpu:  0.85
+    up_wbuf_write_mapped_15_10 (20x) - cpu:  0.77
+    up_wbuf_write_mapped_15_11 (20x) - cpu:  1.38
+    up_wbuf_write_mapped_15_12 (20x) - cpu:  0.91
+    up_wbuf_write_mapped_15_13 (20x) - cpu:  1.19
+    up_wbuf_write_mapped_15_14 (20x) - cpu:  0.89
+    up_wbuf_write_mapped_15_15 (20x) - cpu:  0.54
+```
+
+```
 Ubuntu Intel(R) UHD Graphics 730 (ADL-S GT1) (IntegratedGPU) via Vulkan
       up_wbuf_queue_write_15_6 (20x) - cpu: 10.79
       up_wbuf_queue_write_15_7 (20x) - cpu:  6.60
@@ -167,6 +192,29 @@ Apple M1 Pro (IntegratedGPU) via Metal
     up_wbuf_write_mapped_20_16 (20x) - cpu:  1.57
     up_wbuf_write_mapped_20_17 (20x) - cpu:  1.52
     up_wbuf_write_mapped_20_18 (20x) - cpu:  1.59
+```
+
+```
+NVIDIA GeForce RTX 2070 with Max-Q Design (DiscreteGPU) via Vulkan
+     up_wbuf_queue_write_20_10 (20x) - cpu: 17.22
+     up_wbuf_queue_write_20_11 (20x) - cpu:  8.80
+     up_wbuf_queue_write_20_12 (20x) - cpu:  4.73
+     up_wbuf_queue_write_20_13 (20x) - cpu:  2.82
+     up_wbuf_queue_write_20_14 (20x) - cpu:  1.84
+     up_wbuf_queue_write_20_15 (20x) - cpu:  1.31
+     up_wbuf_queue_write_20_16 (20x) - cpu:  0.95
+     up_wbuf_queue_write_20_17 (20x) - cpu:  0.81
+     up_wbuf_queue_write_20_18 (20x) - cpu:  0.74
+     up_wbuf_queue_write_20_19 (20x) - cpu:  0.53
+
+    up_wbuf_write_mapped_20_10 (20x) - cpu:  5.29
+    up_wbuf_write_mapped_20_11 (20x) - cpu:  3.62
+    up_wbuf_write_mapped_20_12 (20x) - cpu:  2.48
+    up_wbuf_write_mapped_20_13 (20x) - cpu:  1.73
+    up_wbuf_write_mapped_20_14 (20x) - cpu:  2.32
+    up_wbuf_write_mapped_20_15 (20x) - cpu:  2.21
+    up_wbuf_write_mapped_20_16 (20x) - cpu:  2.40
+    up_wbuf_write_mapped_20_17 (20x) - cpu:  1.32
 ```
 
 ```
@@ -245,6 +293,31 @@ Apple M1 Pro (IntegratedGPU) via Metal
     up_wbuf_write_mapped_25_19 (20x) - cpu:  8.30
     up_wbuf_write_mapped_25_20 (20x) - cpu:  8.40
     up_wbuf_write_mapped_25_21 (20x) - cpu:  8.33
+```
+
+```
+NVIDIA GeForce RTX 2070 with Max-Q Design (DiscreteGPU) via Vulkan
+     up_wbuf_queue_write_25_12 (20x) - cpu:147.93
+     up_wbuf_queue_write_25_13 (20x) - cpu: 81.97
+     up_wbuf_queue_write_25_14 (20x) - cpu: 52.02
+     up_wbuf_queue_write_25_15 (20x) - cpu: 34.18
+     up_wbuf_queue_write_25_16 (20x) - cpu: 25.55
+     up_wbuf_queue_write_25_17 (20x) - cpu: 23.08
+     up_wbuf_queue_write_25_18 (20x) - cpu: 19.26
+     up_wbuf_queue_write_25_19 (20x) - cpu: 15.08
+     up_wbuf_queue_write_25_20 (20x) - cpu: 11.85
+     up_wbuf_queue_write_25_21 (20x) - cpu: 11.44
+
+    up_wbuf_write_mapped_25_12 (20x) - cpu: 44.80
+    up_wbuf_write_mapped_25_13 (20x) - cpu: 33.70
+    up_wbuf_write_mapped_25_14 (20x) - cpu: 29.43
+    up_wbuf_write_mapped_25_15 (20x) - cpu: 25.57
+    up_wbuf_write_mapped_25_16 (20x) - cpu: 20.84
+    up_wbuf_write_mapped_25_17 (20x) - cpu: 18.12
+    up_wbuf_write_mapped_25_18 (20x) - cpu: 16.72
+    up_wbuf_write_mapped_25_19 (20x) - cpu: 17.04
+    up_wbuf_write_mapped_25_20 (20x) - cpu: 20.82
+    up_wbuf_write_mapped_25_21 (20x) - cpu: 16.57
 ```
 
 ```
@@ -328,6 +401,31 @@ Apple M1 Pro (IntegratedGPU) via Metal
     up_wbuf_write_mapped_28_21 (20x) - cpu: 59.63
     up_wbuf_write_mapped_28_22 (20x) - cpu: 58.18
     up_wbuf_write_mapped_28_23 (20x) - cpu: 56.93
+```
+
+```
+NVIDIA GeForce RTX 2070 with Max-Q Design (DiscreteGPU) via Vulkan
+     up_wbuf_queue_write_28_14 (20x) - cpu:393.93
+     up_wbuf_queue_write_28_15 (20x) - cpu:254.63
+     up_wbuf_queue_write_28_16 (20x) - cpu:193.14
+     up_wbuf_queue_write_28_17 (20x) - cpu:127.05
+     up_wbuf_queue_write_28_18 (20x) - cpu:104.70
+     up_wbuf_queue_write_28_19 (20x) - cpu: 91.48
+     up_wbuf_queue_write_28_20 (20x) - cpu: 77.17
+     up_wbuf_queue_write_28_21 (20x) - cpu: 74.34
+     up_wbuf_queue_write_28_22 (20x) - cpu: 73.06
+     up_wbuf_queue_write_28_23 (20x) - cpu: 69.31
+
+    up_wbuf_write_mapped_28_14 (20x) - cpu:241.89
+    up_wbuf_write_mapped_28_15 (20x) - cpu:187.67
+    up_wbuf_write_mapped_28_16 (20x) - cpu:174.13
+    up_wbuf_write_mapped_28_17 (20x) - cpu:153.40
+    up_wbuf_write_mapped_28_18 (20x) - cpu:149.22
+    up_wbuf_write_mapped_28_19 (20x) - cpu:146.43
+    up_wbuf_write_mapped_28_20 (20x) - cpu:146.16
+    up_wbuf_write_mapped_28_21 (20x) - cpu:152.07
+    up_wbuf_write_mapped_28_22 (20x) - cpu:151.79
+    up_wbuf_write_mapped_28_23 (20x) - cpu:160.12
 ```
 
 ```
@@ -462,4 +560,5 @@ On Win11 with UHD, this crashed with `Buffer size 1073741824 is greater than the
 ## Conclusion
 
 It seems safe to use a chunksize that is about 1/16th of the buffer size,
-capped by a size of about 1MB.
+capped by a size of about 1MB. Interestingly, the numbers for the tipping points
+are very similar for the different devices uses in these benchmarks.
