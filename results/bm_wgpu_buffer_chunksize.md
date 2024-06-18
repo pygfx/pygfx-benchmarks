@@ -66,7 +66,7 @@ worst-case scenario where every other chunk is uploaded.
 ## Measurements
 
 
-### With a 32 KiB (2**15) byte buffer
+### With a 32 KiB (`2**15`) byte buffer
 ```
 Apple M1 Pro (IntegratedGPU) via Metal
       up_wbuf_queue_write_15_6 (20x) - cpu:  4.91
@@ -165,12 +165,12 @@ Win11 Intel(R) UHD Graphics 730 (IntegratedGPU) via Vulkan
     up_wbuf_write_mapped_15_15 (20x) - cpu:  0.25
 ```
 
-On a Mac, the tipping point is at about 2**12 for queue_write,
-and at 2**8 for write_mapped.
+On a Mac, the tipping point is at about `2**12` for queue_write,
+and at `2**8` for write_mapped.
 
 Tipping point is very similar for UHD Graphics.
 
-### With a 1 MiB (2**20) buffer
+### With a 1 MiB (`2**20`) buffer
 ```
 Apple M1 Pro (IntegratedGPU) via Metal
      up_wbuf_queue_write_20_10 (20x) - cpu:  7.14
@@ -263,13 +263,13 @@ Win 11 Intel(R) UHD Graphics 730 (IntegratedGPU) via Vulkan
     up_wbuf_write_mapped_20_17 (20x) - cpu:  0.48
 ```
 
-On a Mac, the tipping point is at about 2**17 for queue_write,
-and at 2**14 for write_mapped.
+On a Mac, the tipping point is at about `2**17` for queue_write,
+and at `2**14` for write_mapped.
 
-For UHD Graphics the tipping point seems about 2**16 and 2**12, respectively.
+For UHD Graphics the tipping point seems about `2**16` and `2**12`, respectively.
 
 
-### With a 32 MiB (2**25) byte buffer
+### With a 32 MiB (`2**25`) byte buffer
 ```
 Apple M1 Pro (IntegratedGPU) via Metal
      up_wbuf_queue_write_25_12 (20x) - cpu: 66.52
@@ -370,13 +370,13 @@ Win11 Intel(R) UHD Graphics 730 (IntegratedGPU) via Vulkan
     up_wbuf_write_mapped_25_21 (20x) - cpu: 10.80
 ```
 
-On a Mac, the tipping point is at about 2**20 for queue_write,
-and at 2**16 for write_mapped.
+On a Mac, the tipping point is at about `2**20` for queue_write,
+and at `2**16` for write_mapped.
 
 Slightly later tipping points for UHD Graphics.
 
 
-### With a 256 MiB (2**28) byte buffer
+### With a 256 MiB (`2**28`) byte buffer
 
 ```
 Apple M1 Pro (IntegratedGPU) via Metal
@@ -478,10 +478,10 @@ Win11 Intel(R) UHD Graphics 730 (IntegratedGPU) via Vulkan
     up_wbuf_write_mapped_28_23 (20x) - cpu:107.04
 ```
 
-Similar results, tipping point at about 2**20.
+Similar results, tipping point at about `2**20`.
 
 
-### With a 1GiB (2**30) byte buffer
+### With a 1GiB (`2**30`) byte buffer
 ```
 Apple M1 Pro (IntegratedGPU) via Metal
      up_wbuf_queue_write_30_17 (20x) - cpu:452.85
@@ -546,8 +546,8 @@ Ubuntu Intel(R) UHD Graphics 730 (ADL-S GT1) (IntegratedGPU) via Vulkan
     up_wbuf_write_mapped_30_29 (20x) - cpu:490.21
 ```
 
-On a Mac, the tipping point is at about 2**21 for queue_write,
-and at 2**19 for write_mapped. Similar tipping points for Ubuntu UHD Graphics.
+On a Mac, the tipping point is at about `2**21` for queue_write,
+and at `2**19` for write_mapped. Similar tipping points for Ubuntu UHD Graphics.
 
 Also interesting is that with the 1GB buffer, uploading the full buffer
 takes longer (consistently) for queue_write. So chunking, even if not needed, can be beneficial as well!
@@ -563,3 +563,8 @@ On Win11 this crashes with `Buffer size 1073741824 is greater than the maximum b
 It seems safe to use a chunksize that is about 1/16th of the buffer size,
 capped by a size of about 1MB. Interestingly, the numbers for the tipping points
 are very similar for the different devices uses in these benchmarks.
+
+
+The `queue_write` method generally outperforms `write_mapped`, especially for larger chunk sizes.
+On the other hand, `write_mapped` can take smaller chunk sizes before it shows in the
+performance.
