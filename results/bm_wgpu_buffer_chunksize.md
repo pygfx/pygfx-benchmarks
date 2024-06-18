@@ -515,6 +515,7 @@ Apple M1 Pro (IntegratedGPU) via Metal
     up_wbuf_write_mapped_30_30 (20x) - cpu:274.61
 ```
 
+```
 Ubuntu Intel(R) UHD Graphics 730 (ADL-S GT1) (IntegratedGPU) via Vulkan
      up_wbuf_queue_write_30_17 (20x) - cpu:562.52
      up_wbuf_queue_write_30_18 (20x) - cpu:536.70
@@ -543,7 +544,7 @@ Ubuntu Intel(R) UHD Graphics 730 (ADL-S GT1) (IntegratedGPU) via Vulkan
     up_wbuf_write_mapped_30_27 (20x) - cpu:492.19
     up_wbuf_write_mapped_30_28 (20x) - cpu:490.46
     up_wbuf_write_mapped_30_29 (20x) - cpu:490.21
-
+```
 
 On a Mac, the tipping point is at about 2**21 for queue_write,
 and at 2**19 for write_mapped. Similar tipping points for Ubuntu UHD Graphics.
