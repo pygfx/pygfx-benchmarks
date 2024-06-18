@@ -31,6 +31,48 @@ unaligned_split_size = N // nchunks
 page_size = 4096
 aligned_split_size = (unaligned_split_size // page_size) * page_size
 
+
+def empty_aligned(shape, dtype=np.float64, align=4096):
+    """Get an array with desired memory alignment.
+
+    Parameters
+    ==========
+    shape: tuple of ints
+        The desired final shape of the array
+
+    dtype:
+        The desired dtype of the array
+
+    align:
+        The byte alignment of the array
+
+    Returns
+    =======
+    aligned_array:
+        Aligned array of desired shape.
+
+    """
+
+    if not isinstance(shape, tuple):
+        shape = (shape,)
+
+    dtype = np.dtype(dtype)
+    size = dtype.itemsize
+    # Compute the final size of the array
+    for s in shape:
+        size *= s
+
+    a = np.empty(size + (align - 1), dtype=np.uint8)
+    data_align = a.ctypes.data % align
+    offset = 0 if data_align == 0 else (align - data_align)
+    arr = a[offset:offset + size].view(dtype)
+    # Don't use reshape since reshape might copy the data.
+    # This is the suggested way to assign a new shape with guarantee
+    # That the data won't be copied.
+    arr.shape = shape
+    return arr
+
+
 ##
 
 
@@ -228,6 +270,7 @@ def upload_wgpu_buffer_queue_write(math):
     data1 = np.ones((N,), np.uint8)
     data2 = data1 + 1
     data3 = np.ones((N * 2,), np.uint8)[::2]
+    data_aligned = empty_aligned(N, np.uint8)
 
     storage_buffer = device.create_buffer(
         size=N, usage=wgpu.BufferUsage.COPY_DST | wgpu.BufferUsage.STORAGE
@@ -250,7 +293,7 @@ def upload_wgpu_buffer_queue_write(math):
             n = aligned_split_size
             for i in range(nchunks):
                 device.queue.write_buffer(
-                    storage_buffer, i * n, data1[i * n : (i + 1) * n]
+                    storage_buffer, i * n, data_aligned[i * n : (i + 1) * n]
                 )
         elif math == "quarter1":
             n = N // 4
@@ -277,6 +320,7 @@ def upload_wgpu_buffer_with_data(math):
 
     data1 = np.ones((N,), np.uint8)
     data2 = data1 + 1
+    data_aligned = empty_aligned(N, np.uint8)
 
     storage_buffer = device.create_buffer(
         size=N, usage=wgpu.BufferUsage.COPY_DST | wgpu.BufferUsage.STORAGE
@@ -308,7 +352,7 @@ def upload_wgpu_buffer_with_data(math):
             n = aligned_split_size
             for i in range(nchunks):
                 tmp_buffer = device.create_buffer_with_data(
-                    data=data1[i * n : (i + 1) * n], usage=tmp_usage
+                    data=data_aligned[i * n : (i + 1) * n], usage=tmp_usage
                 )
                 encoder.copy_buffer_to_buffer(tmp_buffer, 0, storage_buffer, i * n, n)
         elif math == "quarter1":
@@ -338,6 +382,7 @@ def upload_wgpu_buffer_write_mapped(math):
 
     data1 = np.ones((N,), np.uint8)
     data2 = data1 + 1
+    data_aligned = empty_aligned(N, np.uint8)
 
     storage_buffer = device.create_buffer(
         size=N, usage=wgpu.BufferUsage.COPY_DST | wgpu.BufferUsage.STORAGE
@@ -405,7 +450,7 @@ def upload_wgpu_buffer_write_mapped(math):
 
             n = aligned_split_size
             for i in range(nchunks):
-                tmp_buffer.write_mapped(data1[i * n : (i + 1) * n], i * n)
+                tmp_buffer.write_mapped(data_aligned[i * n : (i + 1) * n], i * n)
 
             tmp_buffer.unmap()
             encoder.copy_buffer_to_buffer(tmp_buffer, 0, storage_buffer, 0, N)
@@ -451,6 +496,7 @@ def upload_wgpu_buffer_get_mapped_range(math):
 
     data1 = np.ones((N,), np.uint8)
     data2 = data1 + 1
+    data_aligned = empty_aligned(N, np.uint8)
 
     data3 = np.ones((N * 2,), np.uint8)[::2]
     mask2= np.zeros_like(data1, bool)
@@ -487,7 +533,7 @@ def upload_wgpu_buffer_get_mapped_range(math):
             for i in range(nchunks):
                 mapped_array = tmp_buffer._experimental_get_mapped_range(i * n, n)
                 mapped_array = np.frombuffer(mapped_array, dtype=np.uint8)
-                mapped_array[:] = data1[i * n : (i + 1) * n]
+                mapped_array[:] = data_aligned[i * n : (i + 1) * n]
         elif math == "quarter1":
             n = N // 4
             mapped_array = tmp_buffer._experimental_get_mapped_range(0, n)
