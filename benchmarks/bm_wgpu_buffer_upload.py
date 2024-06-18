@@ -185,17 +185,27 @@ def up_wbuf_mapped_range_add(canvas):
     return upload_wgpu_buffer_get_mapped_range("add")
 
 
-# With a mapped buffer, can precisely update data
+# With a mapped buffer, can precisely update data, and do non-contiguous stuff.
+# Some of that trickery could be included in buffer.write_mapped(), but is
+# that worth it? -> its is not!
 
-
-@benchmark(20)
-def up_wbuf_mapped_range_inter2(canvas):
-    return upload_wgpu_buffer_get_mapped_range("inter2")
 
 
 @benchmark(20)
-def up_wbuf_mapped_range_inter2_alt(canvas):
-    return upload_wgpu_buffer_get_mapped_range("inter2_alt")
+def up_wbuf_queue_write_noncont_src(canvas):
+    return upload_wgpu_buffer_queue_write("noncont_src")
+
+@benchmark(20)
+def up_wbuf_mapped_range_noncont_src(canvas):
+    return upload_wgpu_buffer_get_mapped_range("noncont_src")
+
+@benchmark(20)
+def up_wbuf_mapped_range_noncont_dst(canvas):
+    return upload_wgpu_buffer_get_mapped_range("noncont_dst")
+
+@benchmark(20)
+def up_wbuf_mapped_range_noncont_both(canvas):
+    return upload_wgpu_buffer_get_mapped_range("noncont_both")
 
 @benchmark(20)
 def up_wbuf_mapped_range_masked2(canvas):
@@ -213,6 +223,7 @@ def upload_wgpu_buffer_queue_write(math):
 
     data1 = np.ones((N,), np.uint8)
     data2 = data1 + 1
+    data3 = np.ones((N * 2,), np.uint8)[::2]
 
     storage_buffer = device.create_buffer(
         size=N, usage=wgpu.BufferUsage.COPY_DST | wgpu.BufferUsage.STORAGE
@@ -243,6 +254,9 @@ def upload_wgpu_buffer_queue_write(math):
         elif math == "quarter3":
             n = N // 4
             device.queue.write_buffer(storage_buffer, 2 * n, data1[:n])
+        elif math == "noncont_src":
+            # Make contiguous with a copy
+            device.queue.write_buffer(storage_buffer, 0, np.ascontiguousarray(data3), 0, N)
         else:
             assert False
 
@@ -420,7 +434,9 @@ def upload_wgpu_buffer_get_mapped_range(math):
 
     data1 = np.ones((N,), np.uint8)
     data2 = data1 + 1
-    mask2 = np.zeros_like(data1, bool)
+
+    data3 = np.ones((N * 2,), np.uint8)[::2]
+    mask2= np.zeros_like(data1, bool)
     mask2[::2] = True
 
     storage_buffer = device.create_buffer(
@@ -465,14 +481,23 @@ def upload_wgpu_buffer_get_mapped_range(math):
             mapped_array = tmp_buffer._experimental_get_mapped_range(2 * n, n)
             mapped_array = np.frombuffer(mapped_array, dtype=np.uint8)
             mapped_array[:] = data1[2 * n : 3 * n]
-        elif math == "inter2":
+        elif math == "noncont_src":
             mapped_array = tmp_buffer._experimental_get_mapped_range()
             mapped_array = np.frombuffer(mapped_array, dtype=np.uint8)
-            mapped_array[::2] = data1[::2]
+            mapped_array[:] = data3  # Moving N bytes
+        elif math == "noncont_dst":
+            mapped_array = tmp_buffer._experimental_get_mapped_range()
+            mapped_array = np.frombuffer(mapped_array, dtype=np.uint8)
+            mapped_array[0::2] = data1[:N//2]  # Moving N/2 bytes
+            mapped_array[1::2] = data1[N//2:]  # Moving N/2 bytes
+        elif math == "noncont_both":
+            mapped_array = tmp_buffer._experimental_get_mapped_range()
+            mapped_array = np.frombuffer(mapped_array, dtype=np.uint8)
+            mapped_array[0::2] = data1[::2]  # Moving N/2 bytes
         elif math == "masked2":
             mapped_array = tmp_buffer._experimental_get_mapped_range()
             mapped_array = np.frombuffer(mapped_array, dtype=np.uint8)
-            mapped_array[mask2] = data1[mask2]
+            mapped_array[mask2] = data1[mask2]  # Moving N/2 bytes
         else:
             assert False
 

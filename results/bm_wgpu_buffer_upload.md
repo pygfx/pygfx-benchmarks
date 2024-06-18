@@ -264,37 +264,51 @@ This case is somewhat of a niche, but people in this niche probably care about p
 be able to want to apply this approach ...
 
 
-## Setting data using step or mask
+## Setting non-contiguous data or a mask
 
 The `mapped_range` approach allows for more flexible setting of the data, like
-`mapped_array[::2] = data[::2]` and `mapped_array[mask] = data[mask]`
+`mapped_array[::2] = data[::2]` and `mapped_array[mask] = data[mask]`.
+It also allows setting data stored in non-contiguous arrays.
 
 MacOS M1:
 ```
-   up_wbuf_mapped_range_inter2 (20x) - cpu: 36.71
-  up_wbuf_mapped_range_masked2 (20x) - cpu:481.81
+   up_wbuf_queue_write_noncont_src (20x) - cpu: 60.68
+  up_wbuf_mapped_range_noncont_src (20x) - cpu: 53.80
+  up_wbuf_mapped_range_noncont_dst (20x) - cpu: 54.51
+ up_wbuf_mapped_range_noncont_both (20x) - cpu: 37.24
+      up_wbuf_mapped_range_masked2 (20x) - cpu:478.62
+
 ```
 
 Win 11 laptop with NVIDIA GeForce RTX 2070:
 ```
-   up_wbuf_mapped_range_inter2 (20x) - cpu: 75.49
-  up_wbuf_mapped_range_masked2 (20x) - cpu:731.32
+ up_wbuf_mapped_range_noncont_both (20x) - cpu: 75.49
+      up_wbuf_mapped_range_masked2 (20x) - cpu:731.32
 ```
 
 Ubuntu 22.04 with Intel(R) UHD Graphics 730:
 ```
-   up_wbuf_mapped_range_inter2 (20x) - cpu: 62.48
-  up_wbuf_mapped_range_masked2 (20x) - cpu:533.96
+ up_wbuf_mapped_range_noncont_both (20x) - cpu: 62.48
+      up_wbuf_mapped_range_masked2 (20x) - cpu:533.96
 ```
 
 Win 11 with Intel(R) UHD Graphics 730:
 ```
-   up_wbuf_mapped_range_inter2 (20x) - cpu: 37.11
-  up_wbuf_mapped_range_masked2 (20x) - cpu:497.01
+ up_wbuf_mapped_range_noncont_both (20x) - cpu: 37.11
+      up_wbuf_mapped_range_masked2 (20x) - cpu:497.01
 ```
 
-This shows that tricks like this don't help at all. We're much better off by
-just uploading the whole array. Very good to know though!
+This shows that it's very important for the source data to be contiguous.
+Doing a copy (as done in `up_wbuf_queue_write_noncont_src`) is costly.
+Using a mapped buffer avoids this copy, but the transfer is still much slower
+than with a contiguous array.
+
+This also shows that indexing tricks to reduce the amount of data being uploaded
+don't help at all. Using a mask is even worce. We'd be much better off by
+just uploading the whole array.
+
+This is very valuable info. It means we can forget about fancy syncing scemes,
+and can stick to an efficient chunking mechanic.
 
 
 ## Summary
