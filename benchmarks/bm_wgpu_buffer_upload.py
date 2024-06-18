@@ -113,6 +113,10 @@ def up_wbuf_write_mapped_chunked(canvas):
     return upload_wgpu_buffer_write_mapped("chunked")
 
 
+@benchmark(20)
+def up_wbuf_write_mapped_chunkedv2(canvas):
+    return upload_wgpu_buffer_write_mapped("chunkedv2")
+
 # Setting in chunks, but aligned
 
 
@@ -379,6 +383,19 @@ def upload_wgpu_buffer_write_mapped(math):
 
             tmp_buffer.unmap()
             encoder.copy_buffer_to_buffer(tmp_buffer, 0, storage_buffer, 0, N)
+
+        elif math == "chunkedv2":
+            n = unaligned_split_size
+            for i in range(nchunks):
+                tmp_buffer = device.create_buffer(
+                    size=n, usage=wgpu.BufferUsage.MAP_WRITE | wgpu.BufferUsage.COPY_SRC
+                )
+                tmp_buffer.map(wgpu.MapMode.WRITE)  # Waits for gpu with _poll()
+
+                tmp_buffer.write_mapped(data1[i * n : (i + 1) * n], 0)
+
+                tmp_buffer.unmap()
+                encoder.copy_buffer_to_buffer(tmp_buffer, 0, storage_buffer, 0, n)
 
         elif math == "aligned":
             tmp_buffer = device.create_buffer(

@@ -554,7 +554,7 @@ takes longer (consistently) for queue_write. So chunking, even if not needed, ca
 Another observation is that queue_write outperforms write_mapped, for a buffer
 of this size.
 
-On Win11 with UHD, this crashed with `Buffer size 1073741824 is greater than the maximum buffer size (268435456)`.
+On Win11 this crashes with `Buffer size 1073741824 is greater than the maximum buffer size (268435456)`.
 
 
 ## Conclusion

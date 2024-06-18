@@ -101,6 +101,7 @@ MacOS M1:
    up_wbuf_queue_write_chunked (20x) - cpu: 42.56
     up_wbuf_with_data_chuncked (20x) - cpu: 91.85
   up_wbuf_write_mapped_chunked (20x) - cpu: 24.46
+up_wbuf_write_mapped_chunkedv2 (20x) - cpu: 66.02
 ```
 
 Win 11 laptop with NVIDIA GeForce RTX 2070:
@@ -132,6 +133,9 @@ by looping over the chunks, processing them one by one.
 On the M1 The `write_mapped` is definetly the fastest,
 because the buffer is still mapped/unmapped, and then copied as a whole.
 On the GeForce, the same approach approach erforms bad, suggesting that piece being copied comes with significant overhead. The `queue_write` approach is still the fastest in this case. For UHD graphics the `write_mapped` approach may or may not be faster, depending on the device.
+
+In the `write_mapped_chunkedv2` test, a new (smaller) buffer is mapped for each chunk,
+which represents a more realistic scenario (otherwise you cannot benefit from having to upload less data). In this case, the performance advantage (on the M1) is gone.
 
 
 ## Chuncked aligned
@@ -326,6 +330,6 @@ The `buffer._experimental_get_mapped_range()` method does not help, except for t
 niche case of using it for the target of a computation: `np.something(out=mapped_array)`.
 Maybe enough to pubicly expose it in wgpu, but no use in pygfx.
 
-The `queue.write_buffer()` is the fastest approach to set a whole buffer,
-but takes a hit when chunking is applied. Depening on hardware and chunk size,
-it may be faster to use  `buffer.write_mapped()`.
+The `queue.write_buffer()` anf  `buffer.write_mapped()` are the most promising approaches.
+The former seems a bit faster in some cases, while the latter is more flexible. The question
+is whether that can be translated to higher performance.
