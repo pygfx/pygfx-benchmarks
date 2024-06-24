@@ -556,7 +556,7 @@ Another observation is that queue_write outperforms write_mapped, for a buffer
 of this size.
 
 On Win11 this crashes with `Buffer size 1073741824 is greater than the maximum buffer size (268435456)`.
-
+This limit corresponds with `2**28`.
 
 ## Conclusion
 

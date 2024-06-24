@@ -124,6 +124,8 @@ def run_benchmarks(func, buffer_size2, chunk_size2_start, chunk_size2_end):
 
 
 if __name__ == "__main__":
+    pass
+
     # run_benchmarks(up_wbuf_queue_write, 15, 6, 16)
     # run_benchmarks(up_wbuf_write_mapped, 15, 6, 16)
 
@@ -138,5 +140,8 @@ if __name__ == "__main__":
 
     # run_benchmarks(up_wbuf_queue_write, 30, 17, 30)
     # run_benchmarks(up_wbuf_write_mapped, 30, 17, 30)
+
+    run_benchmarks(up_wbuf_queue_write, 31, 18, 31)
+    run_benchmarks(up_wbuf_write_mapped, 32, 19, 32)
 
 
