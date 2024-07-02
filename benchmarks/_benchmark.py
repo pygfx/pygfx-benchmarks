@@ -37,26 +37,35 @@ def benchmark(func):
 
             # Do a few warmup iters. In practice the first iter or two tends to take more time than the rest.
             generator.__next__()
-            generator.__next__()
+            extra_times = generator.__next__()
+
+            time_keys = ["cpu"]
+            if extra_times is not None:
+                time_keys.extend(extra_times.keys())
 
             # Do measurements
-            times = {}
+            times_ns = {
+                k: [] for k in time_keys
+            }
             for iter in range(n_timings):
                 # time.sleep(0) # so weird, if I sleep for 0.1, some tests take longer??
                 t0 = time.perf_counter_ns()
                 extra_times = generator.__next__()
                 t1 = time.perf_counter_ns()
-                times.setdefault("cpu", []).append((t1 - t0))
+                times_ns["cpu"].append((t1 - t0))
                 if extra_times:
                     for k, t in extra_times.items():
-                        times.setdefault(k, []).append(t)
+                        times_ns[k].append(t)
 
             # Process results
             stats_str = ""
-            for k in times.keys():
-                tt = [t / 1000_000 for t in times[k]]
-                mean_str = f"{np.mean(tt):0.2f}".rjust(6)
-                stats_str += f"  {k.strip()}:{mean_str}"
+            for k, time_ns in times_ns.items():
+                time_ns = np.array(time_ns)
+                time_ms = time_ns / 1_000_000
+
+                time_mean_ms = np.mean(time_ms)
+                mean_str = f"{time_mean_ms:0.2f}".rjust(6)
+                stats_str += f"  {k.strip()}:{mean_str} ms"
                 # if len(times) == 1:
                 #     stats_str += f" ± {np.std(tt):0.2f}".ljust(6)
                 #     stats_str += str(tt)
