@@ -3,14 +3,11 @@ import pygfx as gfx
 
 from _benchmark import benchmark, run_all
 
+rng = np.random.default_rng()
+
 # An option to add 5 clipping planes to ensure that the clipping code is not too slow
-clipping_planes = [
-    [0, 1, 0, 0],
-    [0, 0.5, 0, 0],
-    [1, 0, 0, 0],
-    [1, 1, 0, 0],
-    [2, 1, 0, 0],
-]
+five_clipping_planes = rng.random((5, 4) dtype='float32')
+twenty_clipping_planes = rng.random((20, 4) dtype='float32')
 
 
 def benchmark_points(canvas, n_objects, n_verts, *, clipping_planes=None):
@@ -58,9 +55,14 @@ def benchmark_points_1_100k(canvas):
     yield from benchmark_points(canvas, 1, 100_000)
 
 @benchmark
-def benchmark_points_1_100k_clipping_planes(canvas):
+def benchmark_points_1_100k_five_clipping_planes(canvas):
     # 1 points object with 100000 points
-    yield from benchmark_points(canvas, 1, 100_000, clipping_planes=clipping_planes)
+    yield from benchmark_points(canvas, 1, 100_000, clipping_planes=five_clipping_planes)
+
+@benchmark
+def benchmark_points_1_100k_twenty_clipping_planes(canvas):
+    # 1 points object with 100000 points
+    yield from benchmark_points(canvas, 1, 100_000, clipping_planes=twenty_clipping_planes)
 
 @benchmark
 def benchmark_points_100_1000(canvas):
@@ -69,9 +71,14 @@ def benchmark_points_100_1000(canvas):
 
 
 @benchmark
-def benchmark_points_100_1000_clipping_planes(canvas):
+def benchmark_points_100_1000_five_clipping_planes(canvas):
     # 100 points objects with 1000 points each
-    yield from benchmark_points(canvas, 100, 1000, clipping_planes=clipping_planes)
+    yield from benchmark_points(canvas, 100, 1000, clipping_planes=five_clipping_planes)
+
+@benchmark
+def benchmark_points_100_1000_twenty_clipping_planes(canvas):
+    # 100 points objects with 1000 points each
+    yield from benchmark_points(canvas, 100, 1000, clipping_planes=twenty_clipping_planes)
 
 
 @benchmark
@@ -81,9 +88,14 @@ def benchmark_points_1000_100(canvas):
 
 
 @benchmark
-def benchmark_points_1000_100_clipping_planes(canvas):
+def benchmark_points_1000_100_five_clipping_planes(canvas):
     # 1000 points objects with 100 points each
-    yield from benchmark_points(canvas, 1000, 100, clipping_planes=clipping_planes)
+    yield from benchmark_points(canvas, 1000, 100, clipping_planes=five_clipping_planes)
+
+@benchmark
+def benchmark_points_1000_100_twenty_clipping_planes(canvas):
+    # 1000 points objects with 100 points each
+    yield from benchmark_points(canvas, 1000, 100, clipping_planes=twenty_clipping_planes)
 
 
 # A simple case, and a case of drawing 1M
@@ -95,9 +107,14 @@ def benchmark_points_10_10(canvas):
     yield from benchmark_points(canvas, 10, 10)
 
 @benchmark
-def benchmark_points_10_10_clipping_planes(canvas):
+def benchmark_points_10_10_five_clipping_planes(canvas):
     # 10 points objects with 10 points each
-    yield from benchmark_points(canvas, 10, 10, clipping_planes=clipping_planes)
+    yield from benchmark_points(canvas, 10, 10, clipping_planes=five_clipping_planes)
+
+@benchmark
+def benchmark_points_10_10_twenty_clipping_planes(canvas):
+    # 10 points objects with 10 points each
+    yield from benchmark_points(canvas, 10, 10, clipping_planes=twenty_clipping_planes)
 
 
 @benchmark
@@ -106,9 +123,15 @@ def benchmark_points_1_1m(canvas):
     yield from benchmark_points(canvas, 1, 1_000_000)
 
 @benchmark
-def benchmark_points_1_1m_clipping_planes(canvas):
+def benchmark_points_1_1m_five_clipping_planes(canvas):
     # 1 points object with 1mpoints
-    yield from benchmark_points(canvas, 1, 1_000_000, clipping_planes=clipping_planes)
+    yield from benchmark_points(canvas, 1, 1_000_000, clipping_planes=five_clipping_planes)
+
+@benchmark
+def benchmark_points_1_1m_twenty_clipping_planes(canvas):
+    # 1 points object with 1mpoints
+    yield from benchmark_points(canvas, 1, 1_000_000, clipping_planes=twenty_clipping_planes)
+
 
 if __name__ == "__main__":
     from wgpu.gui.auto import WgpuCanvas
