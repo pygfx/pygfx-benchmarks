@@ -7,10 +7,10 @@ rng = np.random.default_rng()
 
 # An option to add 5 clipping planes to ensure that the clipping code is not
 # too slow
-five_clipping_planes = rng.random((5, 4), dtype='float32')
+five_clipping_planes = rng.random((5, 4), dtype='float32').tolist()
 # Twenty should exagerate the clipping code, though it is unclear if it is
 # representative of real workloads
-twenty_clipping_planes = rng.random((20, 4), dtype='float32')
+twenty_clipping_planes = rng.random((20, 4), dtype='float32').tolist()
 
 
 def benchmark_points(canvas, n_objects, n_verts, *, clipping_planes=None):
