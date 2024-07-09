@@ -14,7 +14,6 @@ on one of the other parameters, though ideally a value that works good
 (enough) accross the spectrum.
 """
 
-
 import time
 
 import numpy as np
@@ -40,6 +39,7 @@ print(device.adapter.summary)
 
 ##
 
+
 def up_wbuf_queue_write(buffer_size, chunk_size):
 
     data1 = np.ones((buffer_size,), np.uint8)
@@ -59,9 +59,7 @@ def up_wbuf_queue_write(buffer_size, chunk_size):
     while True:
 
         for i in range(0, nchunks, 1):
-            device.queue.write_buffer(
-                storage_buffer, i * n, data1[i * n : (i + 1) * n]
-            )
+            device.queue.write_buffer(storage_buffer, i * n, data1[i * n : (i + 1) * n])
 
         device.queue.submit([])  # bit of a hack to prevent weird wgpu-core error
         device._poll()  # Wait for GPU to finish queue
@@ -92,7 +90,8 @@ def up_wbuf_write_mapped(buffer_size, chunk_size):
         encoder = device.create_command_encoder()
 
         tmp_buffer = device.create_buffer(
-            size=buffer_size, usage=wgpu.BufferUsage.MAP_WRITE | wgpu.BufferUsage.COPY_SRC
+            size=buffer_size,
+            usage=wgpu.BufferUsage.MAP_WRITE | wgpu.BufferUsage.COPY_SRC,
         )
         tmp_buffer.map(wgpu.MapMode.WRITE)  # Waits for gpu with _poll()
 
@@ -107,7 +106,9 @@ def up_wbuf_write_mapped(buffer_size, chunk_size):
 
         yield
 
+
 ##
+
 
 def create_benchmark(func, buffer_size2, chunk_size2):
 
@@ -116,6 +117,7 @@ def create_benchmark(func, buffer_size2, chunk_size2):
 
     wrapper.__name__ = func.__name__ + f"_{buffer_size2}_{chunk_size2}"
     return benchmark(20)(wrapper)
+
 
 def run_benchmarks(func, buffer_size2, chunk_size2_start, chunk_size2_end):
     for chunk_size2 in range(chunk_size2_start, chunk_size2_end):
@@ -143,5 +145,3 @@ if __name__ == "__main__":
 
     run_benchmarks(up_wbuf_queue_write, 31, 18, 31)
     run_benchmarks(up_wbuf_write_mapped, 32, 19, 32)
-
-

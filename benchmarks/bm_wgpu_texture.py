@@ -7,7 +7,6 @@ they are multi-dimensional. This benchmark gets more insights into that
 aspect.
 """
 
-
 import time
 
 import numpy as np
@@ -34,6 +33,7 @@ print(device.adapter.summary)
 
 ##
 
+
 def up_wtex_write_mapped(dim, tex_size, chunk_size):
 
     assert isinstance(dim, int) and dim in (1, 2, 3)
@@ -44,7 +44,10 @@ def up_wtex_write_mapped(dim, tex_size, chunk_size):
     data1 = np.ones(tuple(reversed(tex_size)), np.uint8)
 
     texture = device.create_texture(
-        dimension=dim, size=tex_size, usage=wgpu.TextureUsage.COPY_DST | wgpu.TextureUsage.TEXTURE_BINDING, format=wgpu.TextureFormat.r8unorm
+        dimension=dim,
+        size=tex_size,
+        usage=wgpu.TextureUsage.COPY_DST | wgpu.TextureUsage.TEXTURE_BINDING,
+        format=wgpu.TextureFormat.r8unorm,
     )
 
     yield
@@ -57,7 +60,8 @@ def up_wtex_write_mapped(dim, tex_size, chunk_size):
 
         bytes_per_pixel = 1
         tmp_buffer = device.create_buffer(
-            size=chunk.nbytes, usage=wgpu.BufferUsage.MAP_WRITE | wgpu.BufferUsage.COPY_SRC
+            size=chunk.nbytes,
+            usage=wgpu.BufferUsage.MAP_WRITE | wgpu.BufferUsage.COPY_SRC,
         )
         tmp_buffer.map(wgpu.MapMode.WRITE)  # Waits for gpu with _poll()
 
@@ -65,7 +69,11 @@ def up_wtex_write_mapped(dim, tex_size, chunk_size):
 
         tmp_buffer.unmap()
         encoder.copy_buffer_to_texture(
-            {"buffer": tmp_buffer, "bytes_per_row": chunk.shape[2] * bytes_per_pixel, "rows_per_image": chunk.shape[1]},
+            {
+                "buffer": tmp_buffer,
+                "bytes_per_row": chunk.shape[2] * bytes_per_pixel,
+                "rows_per_image": chunk.shape[1],
+            },
             {"texture": texture},
             copy_size=chunk_size,
         )
@@ -81,15 +89,17 @@ def up_wtex_queue_write(dim, tex_size, chunk_size):
     assert isinstance(dim, int) and dim in (1, 2, 3)
     assert isinstance(tex_size, tuple) and len(tex_size) == 3
 
-
     # bpp, nchannels, dtype, format = 1, 1, np.uint8, wgpu.TextureFormat.r8unorm
     bpp, nchannels, dtype, format = 16, 4, np.float32, wgpu.TextureFormat.rgba32float
 
-    np_shape = tuple(reversed(tex_size)) + (nchannels, )
+    np_shape = tuple(reversed(tex_size)) + (nchannels,)
     data1 = np.ones(np_shape, dtype)
 
     texture = device.create_texture(
-        dimension=dim, size=tex_size, usage=wgpu.TextureUsage.COPY_DST | wgpu.TextureUsage.TEXTURE_BINDING, format=format
+        dimension=dim,
+        size=tex_size,
+        usage=wgpu.TextureUsage.COPY_DST | wgpu.TextureUsage.TEXTURE_BINDING,
+        format=format,
     )
 
     # Get number of chunks in each dimension
@@ -97,7 +107,7 @@ def up_wtex_queue_write(dim, tex_size, chunk_size):
     chunk_size = list(chunk_size)
     for i in range(3):
         nchunks[i] = tex_size[i] // chunk_size[i]
-        if  nchunks[i] <= 1:
+        if nchunks[i] <= 1:
             nchunks[i] = 1
             chunk_size[i] = tex_size[i]
 
@@ -106,13 +116,24 @@ def up_wtex_queue_write(dim, tex_size, chunk_size):
         for iz in range(nchunks[2]):
             for iy in range(nchunks[1]):
                 for ix in range(nchunks[0]):
-                    origin = ix * chunk_size[0], iy * chunk_size[1], iz * chunk_size[2],
-                    chunk = data1[origin[2]:origin[2]+chunk_size[2], origin[1]:origin[1]+chunk_size[1], origin[0]:origin[0]+chunk_size[0]]
+                    origin = (
+                        ix * chunk_size[0],
+                        iy * chunk_size[1],
+                        iz * chunk_size[2],
+                    )
+                    chunk = data1[
+                        origin[2] : origin[2] + chunk_size[2],
+                        origin[1] : origin[1] + chunk_size[1],
+                        origin[0] : origin[0] + chunk_size[0],
+                    ]
                     chunk = np.ascontiguousarray(chunk)
                     device.queue.write_texture(
                         {"texture": texture, "origin": origin},
                         chunk,
-                        {"bytes_per_row": chunk.shape[2] * bpp, "rows_per_image": chunk.shape[1]},
+                        {
+                            "bytes_per_row": chunk.shape[2] * bpp,
+                            "rows_per_image": chunk.shape[1],
+                        },
                         chunk_size,
                     )
 
@@ -129,6 +150,7 @@ def create_benchmark(func, dim, tex_size, chunk_size, suffix):
 
     wrapper.__name__ = func.__name__ + suffix
     return benchmark(20)(wrapper)
+
 
 def run_benchmark_set(func, dim, tex_size):
     b = create_benchmark(func, dim, tex_size, tex_size, f"_{tex_size}")
@@ -150,7 +172,6 @@ if __name__ == "__main__":
     # run_benchmark_set(up_wtex_queue_write, 2, (512, 512, 1))
     # run_benchmark_set(up_wtex_queue_write, 2, (1024, 1024, 1))
     # run_benchmark_set(up_wtex_queue_write, 2, (2048, 2048, 1))
-    #
     #
     # run_benchmark_set(up_wtex_write_mapped, 2, (256, 256, 1))
     # run_benchmark_set(up_wtex_write_mapped, 2, (512, 512, 1))
@@ -193,31 +214,29 @@ if __name__ == "__main__":
     run_benchmark_chunks(2, (2048, 2048, 1), (2048, 1024, 1))
     run_benchmark_chunks(2, (2048, 2048, 1), (2048, 2048, 1))
 
-
     print("-- 3D")
-    size3d = 512, 512, 1024
+    size3d = 512, 512, 256
 
     run_benchmark_chunks(2, size3d, (64, 64, 64))
     run_benchmark_chunks(2, size3d, (128, 128, 128))
     run_benchmark_chunks(2, size3d, (256, 256, 256))
-    run_benchmark_chunks(2, size3d, (512, 512, 512))
-    run_benchmark_chunks(2, size3d, (512, 512, 1024))
+    run_benchmark_chunks(2, size3d, (512, 512, 256))
 
     print("--")
 
-    run_benchmark_chunks(2, size3d, (32, 512, 1024))
-    run_benchmark_chunks(2, size3d, (64, 512, 1024))
-    run_benchmark_chunks(2, size3d, (128, 512, 1024))
-    run_benchmark_chunks(2, size3d, (256, 512, 1024))
-    run_benchmark_chunks(2, size3d, (512, 512, 1024))
+    run_benchmark_chunks(2, size3d, (32, 512, 256))
+    run_benchmark_chunks(2, size3d, (64, 512, 256))
+    run_benchmark_chunks(2, size3d, (128, 512, 256))
+    run_benchmark_chunks(2, size3d, (256, 512, 256))
+    run_benchmark_chunks(2, size3d, (512, 512, 256))
 
     print("--")
 
-    run_benchmark_chunks(2, size3d, (512, 32, 1024))
-    run_benchmark_chunks(2, size3d, (512, 64, 1024))
-    run_benchmark_chunks(2, size3d, (512, 128, 1024))
-    run_benchmark_chunks(2, size3d, (512, 256, 1024))
-    run_benchmark_chunks(2, size3d, (512, 512, 1024))
+    run_benchmark_chunks(2, size3d, (512, 32, 256))
+    run_benchmark_chunks(2, size3d, (512, 64, 256))
+    run_benchmark_chunks(2, size3d, (512, 128, 256))
+    run_benchmark_chunks(2, size3d, (512, 256, 256))
+    run_benchmark_chunks(2, size3d, (512, 512, 256))
 
     print("--")
 
@@ -225,6 +244,4 @@ if __name__ == "__main__":
     run_benchmark_chunks(2, size3d, (512, 512, 64))
     run_benchmark_chunks(2, size3d, (512, 512, 128))
     run_benchmark_chunks(2, size3d, (512, 512, 256))
-    run_benchmark_chunks(2, size3d, (512, 512, 512))
-    run_benchmark_chunks(2, size3d, (512, 512, 1024))
-
+    # run_benchmark_chunks(2, size3d, (512, 512, 256))

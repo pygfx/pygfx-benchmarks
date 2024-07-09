@@ -250,6 +250,8 @@ last dimension of the texture.
 ## Conclusions
 
 For textures it looks like the `queue.write_texture()` method is the way to go.
+Another advantage of this method is that it does not require `bytes_per_row` to
+be a multiple of 256.
 
 Using chunks seems to incur an overhead sooner than it does with buffers,
 so keeping the uploaded chunks large, e.g. by merging chunks, is important.
@@ -261,12 +263,3 @@ but it's still slower when any but the slowest changing dimension is chunked.
 
 Beyond a texture size of 1GB, uploading the buffer as a whole becomes slower, and
 using chunks actually adds benefit.
-
-
-
-
-
-
-
-
-

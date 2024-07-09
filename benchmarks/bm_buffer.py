@@ -55,9 +55,7 @@ def upload_buffer_full_optimized(canvas):
 
     while True:
         if hasattr(buffer, "set_data"):
-            # buffer.set_data(data2)
-            # buffer._chunk_map.fill(True)
-            # buffer._chunks_any_dirty = True
+            buffer.set_data(data2)
             buffer.update_full()
         else:
             buffer.data[:] = data2
@@ -70,8 +68,8 @@ def upload_buffer_full_optimized(canvas):
 def upload_buffer_full_noncont(canvas):
     # Emulate updating a pretty big buffer
 
-    data1 = np.zeros((N*2,), np.uint8)[::2]
-    data2 = np.ones((N*2,), np.uint8)[::2]
+    data1 = np.zeros((N * 2,), np.uint8)[::2]
+    data2 = np.ones((N * 2,), np.uint8)[::2]
 
     buffer = gfx.Buffer(data1)
     ensure_wgpu_object(buffer)
