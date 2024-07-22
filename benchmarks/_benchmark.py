@@ -44,9 +44,7 @@ def benchmark(func):
                 time_keys.extend(extra_times.keys())
 
             # Do measurements
-            times_ns = {
-                k: [] for k in time_keys
-            }
+            times_ns = {k: [] for k in time_keys}
             for iter in range(n_timings):
                 # time.sleep(0) # so weird, if I sleep for 0.1, some tests take longer??
                 t0 = time.perf_counter_ns()

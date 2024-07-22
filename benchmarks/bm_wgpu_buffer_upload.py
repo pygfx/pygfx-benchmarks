@@ -65,7 +65,7 @@ def empty_aligned(shape, dtype=np.float64, align=4096):
     a = np.empty(size + (align - 1), dtype=np.uint8)
     data_align = a.ctypes.data % align
     offset = 0 if data_align == 0 else (align - data_align)
-    arr = a[offset:offset + size].view(dtype)
+    arr = a[offset : offset + size].view(dtype)
     # Don't use reshape since reshape might copy the data.
     # This is the suggested way to assign a new shape with guarantee
     # That the data won't be copied.
@@ -159,6 +159,7 @@ def up_wbuf_write_mapped_chunked(canvas):
 def up_wbuf_write_mapped_chunkedv2(canvas):
     return upload_wgpu_buffer_write_mapped("chunkedv2")
 
+
 # Setting in chunks, but aligned
 
 
@@ -236,22 +237,25 @@ def up_wbuf_mapped_range_add(canvas):
 # that worth it? -> its is not!
 
 
-
 @benchmark(20)
 def up_wbuf_queue_write_noncont_src(canvas):
     return upload_wgpu_buffer_queue_write("noncont_src")
+
 
 @benchmark(20)
 def up_wbuf_mapped_range_noncont_src(canvas):
     return upload_wgpu_buffer_get_mapped_range("noncont_src")
 
+
 @benchmark(20)
 def up_wbuf_mapped_range_noncont_dst(canvas):
     return upload_wgpu_buffer_get_mapped_range("noncont_dst")
 
+
 @benchmark(20)
 def up_wbuf_mapped_range_noncont_both(canvas):
     return upload_wgpu_buffer_get_mapped_range("noncont_both")
+
 
 @benchmark(20)
 def up_wbuf_mapped_range_masked2(canvas):
@@ -303,7 +307,9 @@ def upload_wgpu_buffer_queue_write(math):
             device.queue.write_buffer(storage_buffer, 2 * n, data1[:n])
         elif math == "noncont_src":
             # Make contiguous with a copy
-            device.queue.write_buffer(storage_buffer, 0, np.ascontiguousarray(data3), 0, N)
+            device.queue.write_buffer(
+                storage_buffer, 0, np.ascontiguousarray(data3), 0, N
+            )
         else:
             assert False
 
@@ -499,7 +505,7 @@ def upload_wgpu_buffer_get_mapped_range(math):
     data_aligned = empty_aligned(N, np.uint8)
 
     data3 = np.ones((N * 2,), np.uint8)[::2]
-    mask2= np.zeros_like(data1, bool)
+    mask2 = np.zeros_like(data1, bool)
     mask2[::2] = True
 
     storage_buffer = device.create_buffer(
@@ -551,8 +557,8 @@ def upload_wgpu_buffer_get_mapped_range(math):
         elif math == "noncont_dst":
             mapped_array = tmp_buffer._experimental_get_mapped_range()
             mapped_array = np.frombuffer(mapped_array, dtype=np.uint8)
-            mapped_array[0::2] = data1[:N//2]  # Moving N/2 bytes
-            mapped_array[1::2] = data1[N//2:]  # Moving N/2 bytes
+            mapped_array[0::2] = data1[: N // 2]  # Moving N/2 bytes
+            mapped_array[1::2] = data1[N // 2 :]  # Moving N/2 bytes
         elif math == "noncont_both":
             mapped_array = tmp_buffer._experimental_get_mapped_range()
             mapped_array = np.frombuffer(mapped_array, dtype=np.uint8)
