@@ -44,7 +44,7 @@ def up_wtex_write_mapped(dim, tex_size, chunk_size):
     data1 = np.ones(tuple(reversed(tex_size)), np.uint8)
 
     texture = device.create_texture(
-        dimension=dim,
+        dimension=f"{dim}d",
         size=tex_size,
         usage=wgpu.TextureUsage.COPY_DST | wgpu.TextureUsage.TEXTURE_BINDING,
         format=wgpu.TextureFormat.r8unorm,
@@ -89,14 +89,14 @@ def up_wtex_queue_write(dim, tex_size, chunk_size):
     assert isinstance(dim, int) and dim in (1, 2, 3)
     assert isinstance(tex_size, tuple) and len(tex_size) == 3
 
-    # bpp, nchannels, dtype, format = 1, 1, np.uint8, wgpu.TextureFormat.r8unorm
-    bpp, nchannels, dtype, format = 16, 4, np.float32, wgpu.TextureFormat.rgba32float
+    bpp, nchannels, dtype, format = 1, 1, np.uint8, wgpu.TextureFormat.r8unorm
+    # bpp, nchannels, dtype, format = 16, 4, np.float32, wgpu.TextureFormat.rgba32float
 
     np_shape = tuple(reversed(tex_size)) + (nchannels,)
     data1 = np.ones(np_shape, dtype)
 
     texture = device.create_texture(
-        dimension=dim,
+        dimension=f"{dim}d",
         size=tex_size,
         usage=wgpu.TextureUsage.COPY_DST | wgpu.TextureUsage.TEXTURE_BINDING,
         format=format,
@@ -143,6 +143,49 @@ def up_wtex_queue_write(dim, tex_size, chunk_size):
         yield
 
 
+def up_wtex_one_chunk(dim, tex_size, chunk_size):
+    """Measure opload time one of one particular chunk."""
+    assert isinstance(dim, int) and dim in (1, 2, 3)
+    assert isinstance(tex_size, tuple) and len(tex_size) == 3
+
+    bpp, nchannels, dtype, format = 1, 1, np.uint8, wgpu.TextureFormat.r8unorm
+    # bpp, nchannels, dtype, format = 16, 4, np.float32, wgpu.TextureFormat.rgba32float
+
+    np_shape = tuple(reversed(tex_size)) + (nchannels,)
+    data1 = np.ones(np_shape, dtype)
+
+    texture = device.create_texture(
+        dimension=f"{dim}d",
+        size=tex_size,
+        usage=wgpu.TextureUsage.COPY_DST | wgpu.TextureUsage.TEXTURE_BINDING,
+        format=format,
+    )
+
+    origin = (0, 0, 0)
+
+    while True:
+        chunk = data1[
+            origin[2] : origin[2] + chunk_size[2],
+            origin[1] : origin[1] + chunk_size[1],
+            origin[0] : origin[0] + chunk_size[0],
+        ]
+        chunk = np.ascontiguousarray(chunk)
+        device.queue.write_texture(
+            {"texture": texture, "origin": origin},
+            chunk,
+            {
+                "bytes_per_row": chunk.shape[2] * bpp,
+                "rows_per_image": chunk.shape[1],
+            },
+            chunk_size,
+        )
+
+        device.queue.submit([])  # bit of a hack to prevent weird wgpu-core error
+        device._poll()  # Wait for GPU to finish queue
+
+        yield
+
+
 def create_benchmark(func, dim, tex_size, chunk_size, suffix):
 
     def wrapper():
@@ -163,20 +206,26 @@ def run_benchmark_chunks(dim, tex_size, chunk_size):
     b()
 
 
+def run_benchmark_one_chunk(dim, tex_size, chunk_size):
+    func = up_wtex_one_chunk
+    b = create_benchmark(func, dim, tex_size, chunk_size, f"_{tex_size}_{chunk_size}")
+    b()
+
+
 if __name__ == "__main__":
     pass
 
-    # print("-- queue_write vs write_mapped")
-    #
-    # run_benchmark_set(up_wtex_queue_write, 2, (256, 256, 1))
-    # run_benchmark_set(up_wtex_queue_write, 2, (512, 512, 1))
-    # run_benchmark_set(up_wtex_queue_write, 2, (1024, 1024, 1))
-    # run_benchmark_set(up_wtex_queue_write, 2, (2048, 2048, 1))
-    #
-    # run_benchmark_set(up_wtex_write_mapped, 2, (256, 256, 1))
-    # run_benchmark_set(up_wtex_write_mapped, 2, (512, 512, 1))
-    # run_benchmark_set(up_wtex_write_mapped, 2, (1024, 1024, 1))
-    # run_benchmark_set(up_wtex_write_mapped, 2, (2048, 2048, 1))
+    print("-- queue_write vs write_mapped")
+
+    run_benchmark_set(up_wtex_queue_write, 2, (256, 256, 1))
+    run_benchmark_set(up_wtex_queue_write, 2, (512, 512, 1))
+    run_benchmark_set(up_wtex_queue_write, 2, (1024, 1024, 1))
+    run_benchmark_set(up_wtex_queue_write, 2, (2048, 2048, 1))
+
+    run_benchmark_set(up_wtex_write_mapped, 2, (256, 256, 1))
+    run_benchmark_set(up_wtex_write_mapped, 2, (512, 512, 1))
+    run_benchmark_set(up_wtex_write_mapped, 2, (1024, 1024, 1))
+    run_benchmark_set(up_wtex_write_mapped, 2, (2048, 2048, 1))
 
     print("-- 1D")
 
@@ -188,60 +237,106 @@ if __name__ == "__main__":
     run_benchmark_chunks(1, (2048, 1, 1), (2048, 1, 1))
 
     print("-- 2D")
+    N2 = 8192
 
-    run_benchmark_chunks(2, (2048, 2048, 1), (64, 64, 1))
-    run_benchmark_chunks(2, (2048, 2048, 1), (128, 128, 1))
-    run_benchmark_chunks(2, (2048, 2048, 1), (256, 256, 1))
-    run_benchmark_chunks(2, (2048, 2048, 1), (512, 512, 1))
-    run_benchmark_chunks(2, (2048, 2048, 1), (1024, 1024, 1))
-    run_benchmark_chunks(2, (2048, 2048, 1), (2048, 2048, 1))
-
-    print("--")
-
-    run_benchmark_chunks(2, (2048, 2048, 1), (64, 2048, 1))
-    run_benchmark_chunks(2, (2048, 2048, 1), (128, 2048, 1))
-    run_benchmark_chunks(2, (2048, 2048, 1), (256, 2048, 1))
-    run_benchmark_chunks(2, (2048, 2048, 1), (512, 2048, 1))
-    run_benchmark_chunks(2, (2048, 2048, 1), (1024, 2048, 1))
-    run_benchmark_chunks(2, (2048, 2048, 1), (2048, 2048, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2 // 32, N2 // 32, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2 // 16, N2 // 16, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2 // 8, N2 // 8, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2 // 4, N2 // 4, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2 // 2, N2 // 2, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2 // 1, N2 // 1, 1))
 
     print("--")
 
-    run_benchmark_chunks(2, (2048, 2048, 1), (2048, 64, 1))
-    run_benchmark_chunks(2, (2048, 2048, 1), (2048, 128, 1))
-    run_benchmark_chunks(2, (2048, 2048, 1), (2048, 256, 1))
-    run_benchmark_chunks(2, (2048, 2048, 1), (2048, 512, 1))
-    run_benchmark_chunks(2, (2048, 2048, 1), (2048, 1024, 1))
-    run_benchmark_chunks(2, (2048, 2048, 1), (2048, 2048, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2 // 32, N2, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2 // 16, N2, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2 // 8, N2, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2 // 4, N2, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2 // 2, N2, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2 // 1, N2, 1))
+
+    print("--")
+
+    run_benchmark_chunks(2, (N2, N2, 1), (N2, N2 // 32, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2, N2 // 16, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2, N2 // 8, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2, N2 // 4, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2, N2 // 2, 1))
+    run_benchmark_chunks(2, (N2, N2, 1), (N2, N2 // 1, 1))
 
     print("-- 3D")
     size3d = 512, 512, 256
+    dim = 2
 
-    run_benchmark_chunks(2, size3d, (64, 64, 64))
-    run_benchmark_chunks(2, size3d, (128, 128, 128))
-    run_benchmark_chunks(2, size3d, (256, 256, 256))
-    run_benchmark_chunks(2, size3d, (512, 512, 256))
-
-    print("--")
-
-    run_benchmark_chunks(2, size3d, (32, 512, 256))
-    run_benchmark_chunks(2, size3d, (64, 512, 256))
-    run_benchmark_chunks(2, size3d, (128, 512, 256))
-    run_benchmark_chunks(2, size3d, (256, 512, 256))
-    run_benchmark_chunks(2, size3d, (512, 512, 256))
+    run_benchmark_chunks(dim, size3d, (64, 64, 64))
+    run_benchmark_chunks(dim, size3d, (128, 128, 128))
+    run_benchmark_chunks(dim, size3d, (256, 256, 256))
+    run_benchmark_chunks(dim, size3d, (512, 512, 256))
 
     print("--")
 
-    run_benchmark_chunks(2, size3d, (512, 32, 256))
-    run_benchmark_chunks(2, size3d, (512, 64, 256))
-    run_benchmark_chunks(2, size3d, (512, 128, 256))
-    run_benchmark_chunks(2, size3d, (512, 256, 256))
-    run_benchmark_chunks(2, size3d, (512, 512, 256))
+    run_benchmark_chunks(dim, size3d, (32, 512, 256))
+    run_benchmark_chunks(dim, size3d, (64, 512, 256))
+    run_benchmark_chunks(dim, size3d, (128, 512, 256))
+    run_benchmark_chunks(dim, size3d, (256, 512, 256))
+    run_benchmark_chunks(dim, size3d, (512, 512, 256))
 
     print("--")
 
-    run_benchmark_chunks(2, size3d, (512, 512, 32))
-    run_benchmark_chunks(2, size3d, (512, 512, 64))
-    run_benchmark_chunks(2, size3d, (512, 512, 128))
-    run_benchmark_chunks(2, size3d, (512, 512, 256))
-    # run_benchmark_chunks(2, size3d, (512, 512, 256))
+    run_benchmark_chunks(dim, size3d, (512, 32, 256))
+    run_benchmark_chunks(dim, size3d, (512, 64, 256))
+    run_benchmark_chunks(dim, size3d, (512, 128, 256))
+    run_benchmark_chunks(dim, size3d, (512, 256, 256))
+    run_benchmark_chunks(dim, size3d, (512, 512, 256))
+
+    print("--")
+
+    run_benchmark_chunks(dim, size3d, (512, 512, 32))
+    run_benchmark_chunks(dim, size3d, (512, 512, 64))
+    run_benchmark_chunks(dim, size3d, (512, 512, 128))
+    run_benchmark_chunks(dim, size3d, (512, 512, 256))
+    # run_benchmark_chunks(dim, size3d, (512, 512, 256))
+
+    print("-- 2D one chunk")
+
+    run_benchmark_one_chunk(2, (8000, 8000, 1), (8000, 8000, 1))
+
+    run_benchmark_one_chunk(2, (8000, 8000, 1), (7000, 8000, 1))
+    run_benchmark_one_chunk(2, (8000, 8000, 1), (4000, 8000, 1))
+    run_benchmark_one_chunk(2, (8000, 8000, 1), (2000, 8000, 1))
+    run_benchmark_one_chunk(2, (8000, 8000, 1), (1000, 8000, 1))
+
+    run_benchmark_one_chunk(2, (8000, 8000, 1), (8000, 7000, 1))
+    run_benchmark_one_chunk(2, (8000, 8000, 1), (8000, 4000, 1))
+    run_benchmark_one_chunk(2, (8000, 8000, 1), (8000, 2000, 1))
+    run_benchmark_one_chunk(2, (8000, 8000, 1), (8000, 1000, 1))
+
+    print("-- 3D one chunk")
+
+    run_benchmark_one_chunk(3, (400, 400, 400), (400, 400, 400))
+
+    print("--")
+    run_benchmark_one_chunk(3, (400, 400, 400), (350, 400, 400))
+    run_benchmark_one_chunk(3, (400, 400, 400), (200, 400, 400))
+    run_benchmark_one_chunk(3, (400, 400, 400), (100, 400, 400))
+    run_benchmark_one_chunk(3, (400, 400, 400), (50, 400, 400))
+    run_benchmark_one_chunk(3, (400, 400, 400), (25, 400, 400))
+
+    print("--")
+    run_benchmark_one_chunk(3, (400, 400, 400), (350, 200, 400))
+    run_benchmark_one_chunk(3, (400, 400, 400), (200, 200, 400))
+    run_benchmark_one_chunk(3, (400, 400, 400), (100, 200, 400))
+    run_benchmark_one_chunk(3, (400, 400, 400), (50, 200, 400))
+    run_benchmark_one_chunk(3, (400, 400, 400), (25, 200, 400))
+
+    print("--")
+    run_benchmark_one_chunk(3, (400, 400, 400), (400, 350, 400))
+    run_benchmark_one_chunk(3, (400, 400, 400), (400, 200, 400))
+    run_benchmark_one_chunk(3, (400, 400, 400), (400, 100, 400))
+    run_benchmark_one_chunk(3, (400, 400, 400), (400, 50, 400))
+
+    print("--")
+    run_benchmark_one_chunk(3, (400, 400, 400), (400, 400, 350))
+    run_benchmark_one_chunk(3, (400, 400, 400), (400, 400, 200))
+    run_benchmark_one_chunk(3, (400, 400, 400), (400, 400, 100))
+    run_benchmark_one_chunk(3, (400, 400, 400), (400, 400, 50))

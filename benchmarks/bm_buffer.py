@@ -137,6 +137,97 @@ def upload_buffer_two_quarters(canvas):
 
 
 @benchmark(20)
+def upload_buffer_chunk_stripes(canvas):
+    # Emulate the worst-case stripe scenario
+
+    data1 = np.zeros((N,), np.uint8)
+    data2 = np.ones((N,), np.uint8)
+
+    buffer = gfx.Buffer(data1)
+    ensure_wgpu_object(buffer)
+    update_resource(buffer)
+
+    step = buffer._chunk_size * 2  # every other chunk
+
+    yield
+
+    while True:
+        # buffer.data[::n] = data1[::n]
+        buffer.update_indices(np.arange(0, N, step))
+
+        update_resource(buffer)
+        yield
+
+
+def upload_buffer_random(n_random):
+
+    data1 = np.zeros((N,), np.uint8)
+
+    buffer = gfx.Buffer(data1)
+    ensure_wgpu_object(buffer)
+    update_resource(buffer)
+
+    yield
+
+    while True:
+        ii = np.random.randint(0, N, n_random)
+        # tex.data[ii] = 1
+        buffer.update_indices(ii)
+        update_resource(buffer)
+        yield
+
+
+@benchmark(20)
+def upload_buffer_random8(canvas):
+    return upload_buffer_random(8)
+
+
+@benchmark(20)
+def upload_buffer_random16(canvas):
+    return upload_buffer_random(16)
+
+
+@benchmark(20)
+def upload_buffer_random32(canvas):
+    return upload_buffer_random(32)
+
+
+@benchmark(20)
+def upload_buffer_random64(canvas):
+    return upload_buffer_random(64)
+
+
+@benchmark(20)
+def upload_buffer_random128(canvas):
+    return upload_buffer_random(128)
+
+
+@benchmark(20)
+def upload_buffer_random256(canvas):
+    return upload_buffer_random(256)
+
+
+@benchmark(20)
+def upload_buffer_random512(canvas):
+    return upload_buffer_random(512)
+
+
+@benchmark(20)
+def upload_v_random1024(canvas):
+    return upload_buffer_random(1024)
+
+
+@benchmark(20)
+def upload_buffer_random2048(canvas):
+    return upload_buffer_random(2048)
+
+
+@benchmark(20)
+def upload_buffer_random4096(canvas):
+    return upload_buffer_random(4096)
+
+
+@benchmark(20)
 def upload_100_buffers(canvas):
     # This emulates updating a bunch of uniform buffers
 

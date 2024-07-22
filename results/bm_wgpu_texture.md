@@ -247,6 +247,57 @@ though it must be such that the chunks are contiguous, thus applies only in the
 last dimension of the texture.
 
 
+## Overhead for non-contiguous chunks
+
+
+When a chunk is contiguous, reducing its size, can, for a texture, result in it
+not being contiguous anymore, if the reduction is in the x-dim (or y-dim for 3D textures).
+This benchmark is to get insight what the costs are, and how much less data
+must be synced before it's worth just sending the full size (in that dimension).
+
+```
+Apple M1 Pro (IntegratedGPU) via Metal
+-- 2D one chunk
+up_wtex_one_chunk_(8000, 8000, 1)_(8000, 8000, 1) (20x) - cpu: 14.92 ms
+up_wtex_one_chunk_(8000, 8000, 1)_(7000, 8000, 1) (20x) - cpu: 19.51 ms
+up_wtex_one_chunk_(8000, 8000, 1)_(4000, 8000, 1) (20x) - cpu: 12.04 ms
+up_wtex_one_chunk_(8000, 8000, 1)_(2000, 8000, 1) (20x) - cpu:  6.89 ms
+up_wtex_one_chunk_(8000, 8000, 1)_(1000, 8000, 1) (20x) - cpu:  4.13 ms
+up_wtex_one_chunk_(8000, 8000, 1)_(8000, 7000, 1) (20x) - cpu: 14.62 ms
+up_wtex_one_chunk_(8000, 8000, 1)_(8000, 4000, 1) (20x) - cpu:  7.60 ms
+up_wtex_one_chunk_(8000, 8000, 1)_(8000, 2000, 1) (20x) - cpu:  4.70 ms
+up_wtex_one_chunk_(8000, 8000, 1)_(8000, 1000, 1) (20x) - cpu:  2.61 ms
+-- 3D one chunk
+up_wtex_one_chunk_(400, 400, 400)_(400, 400, 400) (20x) - cpu: 15.21 ms
+--
+up_wtex_one_chunk_(400, 400, 400)_(350, 400, 400) (20x) - cpu: 22.35 ms
+up_wtex_one_chunk_(400, 400, 400)_(200, 400, 400) (20x) - cpu: 14.87 ms
+up_wtex_one_chunk_(400, 400, 400)_(100, 400, 400) (20x) - cpu: 10.40 ms
+up_wtex_one_chunk_(400, 400, 400)_(50, 400, 400) (20x) - cpu:  9.24 ms
+up_wtex_one_chunk_(400, 400, 400)_(25, 400, 400) (20x) - cpu:  6.54 ms
+--
+up_wtex_one_chunk_(400, 400, 400)_(350, 200, 400) (20x) - cpu: 12.24 ms
+up_wtex_one_chunk_(400, 400, 400)_(200, 200, 400) (20x) - cpu:  8.44 ms
+up_wtex_one_chunk_(400, 400, 400)_(100, 200, 400) (20x) - cpu:  5.44 ms
+up_wtex_one_chunk_(400, 400, 400)_(50, 200, 400) (20x) - cpu:  4.55 ms
+up_wtex_one_chunk_(400, 400, 400)_(25, 200, 400) (20x) - cpu:  3.37 ms
+--
+up_wtex_one_chunk_(400, 400, 400)_(400, 350, 400) (20x) - cpu: 19.56 ms
+up_wtex_one_chunk_(400, 400, 400)_(400, 200, 400) (20x) - cpu: 12.11 ms
+up_wtex_one_chunk_(400, 400, 400)_(400, 100, 400) (20x) - cpu:  6.35 ms
+up_wtex_one_chunk_(400, 400, 400)_(400, 50, 400) (20x) - cpu:  3.33 ms
+--
+up_wtex_one_chunk_(400, 400, 400)_(400, 400, 350) (20x) - cpu: 13.30 ms
+up_wtex_one_chunk_(400, 400, 400)_(400, 400, 200) (20x) - cpu:  8.39 ms
+up_wtex_one_chunk_(400, 400, 400)_(400, 400, 100) (20x) - cpu:  4.83 ms
+up_wtex_one_chunk_(400, 400, 400)_(400, 400, 50) (20x) - cpu:  2.44 ms
+```
+
+The results show that the amount of data must be 1/4th or less, compared to a contigous chunk.
+For 3D texturses, it's even 1/8th for the x dimension. Though if its already
+non-contiguous in y, the extra non-contiguouty for x also follows the 1/4th factor.
+
+
 ## Conclusions
 
 For textures it looks like the `queue.write_texture()` method is the way to go.
@@ -255,9 +306,10 @@ be a multiple of 256.
 
 Using chunks seems to incur an overhead sooner than it does with buffers,
 so keeping the uploaded chunks large, e.g. by merging chunks, is important.
+In here, it's easily worth to span gaps of 3 chunks, if that makes the chunk contiguous.
 
 Chunking in any but the last dimension causes an extra cost, due to the data
-becominv non-contiguous. The non-contiguity at the GPU side is handled much better than what we observed
+becoming non-contiguous. The non-contiguity at the GPU side is handled much better than what we observed
 with buffers (because writing the non-contiguous data to the GPU texture) is optimized)
 but it's still slower when any but the slowest changing dimension is chunked.
 
