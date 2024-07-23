@@ -353,7 +353,11 @@ def upload_tex2d_chunk_stripes_x(canvas):
     ensure_wgpu_object(tex)
     update_resource(tex)
 
-    step = tex._chunk_size[0] * 2  # every other chunk
+    if hasattr(tex, '_chunk_size'):
+        chunk_size = tex._chunk_size[1]
+    else:
+        chunk_size = (800, 1000, 1)
+    step = chunk_size[0] * 2  # every other chunk
 
     yield
 
@@ -373,7 +377,11 @@ def upload_tex2d_chunk_stripes_y(canvas):
     ensure_wgpu_object(tex)
     update_resource(tex)
 
-    step = tex._chunk_size[1] * 2  # every other chunk
+    if hasattr(tex, '_chunk_size'):
+        chunk_size = tex._chunk_size[1]
+    else:
+        chunk_size = (800, 1000, 1)
+    step = chunk_size[1] * 2  # every other chunk
 
     yield
 
@@ -756,7 +764,11 @@ def upload_tex3d_chunk_stripes_x(canvas):
     ensure_wgpu_object(tex)
     update_resource(tex)
 
-    step = tex._chunk_size[0] * 2  # every other chunk
+    if hasattr(tex, '_chunk_size'):
+        chunk_size = tex._chunk_size
+    else:
+        chunk_size = (176, 167, 167)
+    step = chunk_size[0] * 2  # every other chunk
 
     yield
 
@@ -776,7 +788,11 @@ def upload_tex3d_chunk_stripes_y(canvas):
     ensure_wgpu_object(tex)
     update_resource(tex)
 
-    step = tex._chunk_size[1] * 2  # every other chunk
+    if hasattr(tex, '_chunk_size'):
+        chunk_size = tex._chunk_size
+    else:
+        chunk_size = (176, 167, 167)
+    step = chunk_size[1] * 2  # every other chunk
 
     yield
 
@@ -796,7 +812,11 @@ def upload_tex3d_chunk_stripes_z(canvas):
     ensure_wgpu_object(tex)
     update_resource(tex)
 
-    step = tex._chunk_size[2] * 2  # every other chunk
+    if hasattr(tex, '_chunk_size'):
+        chunk_size = tex._chunk_size
+    else:
+        chunk_size = (176, 167, 167)
+    step = chunk_size[2] * 2  # every other chunk
 
     yield
 
