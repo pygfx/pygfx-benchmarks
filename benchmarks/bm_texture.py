@@ -359,10 +359,15 @@ def upload_tex2d_chunk_stripes_x(canvas):
         chunk_size = (800, 1000, 1)
     step = chunk_size[0] * 2  # every other chunk
 
+    if hasattr(tex, 'update_indices'):
+        func = lambda: tex.update_indices(np.arange(0, N2, step), None, None)
+    else:
+        func = lambda: tex.update_range((0, 0, 0), tex.size)
+
     yield
 
     while True:
-        tex.update_indices(np.arange(0, N2, step), None, None)
+        func()
         update_resource(tex)
         yield
 
@@ -383,10 +388,15 @@ def upload_tex2d_chunk_stripes_y(canvas):
         chunk_size = (800, 1000, 1)
     step = chunk_size[1] * 2  # every other chunk
 
+    if hasattr(tex, 'update_indices'):
+        func = lambda: tex.update_indices(np.arange(0, N2, step), None, None)
+    else:
+        func = lambda: tex.update_range((0, 0, 0), tex.size)
+
     yield
 
     while True:
-        tex.update_indices(None, np.arange(0, N2, step), None)
+        func()
         update_resource(tex)
         yield
 
@@ -399,13 +409,19 @@ def upload_tex2d_random(n_random):
     ensure_wgpu_object(tex)
     update_resource(tex)
 
+    can_update_indices = hasattr(tex, 'update_indices')
+
     yield
+
 
     while True:
         xx = np.random.randint(0, N2, n_random)
         yy = np.random.randint(0, N2, n_random)
         # tex.data[yy,xx] = 1
-        tex.update_indices(xx, yy, None)
+        if can_update_indices:
+            tex.update_indices(xx, yy, None)
+        else:
+            tex.update_range((0, 0, 0), tex.size)
         update_resource(tex)
         yield
 
@@ -770,10 +786,15 @@ def upload_tex3d_chunk_stripes_x(canvas):
         chunk_size = (176, 167, 167)
     step = chunk_size[0] * 2  # every other chunk
 
+    if hasattr(tex, 'update_indices'):
+        func = lambda: tex.update_indices(np.arange(0, SHAPE3[2], step), None, None)
+    else:
+        func = lambda: tex.update_range((0, 0, 0), tex.size)
+
     yield
 
     while True:
-        tex.update_indices(np.arange(0, SHAPE3[2], step), None, None)
+        func()
         update_resource(tex)
         yield
 
@@ -794,10 +815,15 @@ def upload_tex3d_chunk_stripes_y(canvas):
         chunk_size = (176, 167, 167)
     step = chunk_size[1] * 2  # every other chunk
 
+    if hasattr(tex, 'update_indices'):
+        func = lambda: tex.update_indices(None, np.arange(0, SHAPE3[1], step), None)
+    else:
+        func = lambda: tex.update_range((0, 0, 0), tex.size)
+
     yield
 
     while True:
-        tex.update_indices(None, np.arange(0, SHAPE3[1], step), None)
+        func()
         update_resource(tex)
         yield
 
@@ -818,10 +844,15 @@ def upload_tex3d_chunk_stripes_z(canvas):
         chunk_size = (176, 167, 167)
     step = chunk_size[2] * 2  # every other chunk
 
+    if hasattr(tex, 'update_indices'):
+        tex.update_indices(None, None, np.arange(0, SHAPE3[0], step))
+    else:
+        func = lambda: tex.update_range((0, 0, 0), tex.size)
+
     yield
 
     while True:
-        tex.update_indices(None, None, np.arange(0, SHAPE3[0], step))
+        func()
         update_resource(tex)
         yield
 
@@ -834,6 +865,8 @@ def upload_tex3d_random(n_random):
     ensure_wgpu_object(tex)
     update_resource(tex)
 
+    can_update_indices = hasattr(tex, 'update_indices')
+
     yield
 
     while True:
@@ -841,7 +874,10 @@ def upload_tex3d_random(n_random):
         yy = np.random.randint(0, SHAPE3[1], n_random)
         zz = np.random.randint(0, SHAPE3[0], n_random)
         # tex.data[zz, yy,xx] = 1
-        tex.update_indices(xx, yy, zz)
+        if can_update_indices:
+            tex.update_indices(xx, yy, zz)
+        else:
+            tex.update_range((0, 0, 0), tex.size)
         update_resource(tex)
         yield
 
