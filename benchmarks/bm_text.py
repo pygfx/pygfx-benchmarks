@@ -90,7 +90,7 @@ def benchmark_changing_one_word_in_big_text(canvas):
         yield
 
 
-@benchmark
+@benchmark(1000)
 def benchmark_changing_one_word_in_small_text(canvas):
 
     renderer = gfx.WgpuRenderer(canvas, blend_mode="ordered1")
