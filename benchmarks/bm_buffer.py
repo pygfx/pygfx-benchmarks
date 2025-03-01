@@ -21,7 +21,7 @@ def update_resource(resource):
 
 
 @benchmark(20)
-def upload_buffer_full_naive(canvas):
+def upload_buffer_full_naive(canvas, n_timings=100_000):
     # Emulate updating a pretty big buffer
 
     data1 = np.zeros((N,), np.uint8)
@@ -33,15 +33,16 @@ def upload_buffer_full_naive(canvas):
 
     yield
 
-    while True:
+    for _ in range(n_timings + 2):
         buffer.data[:] = data2
         buffer.update_range()
         update_resource(buffer)
         yield
+    del buffer
 
 
 @benchmark(20)
-def upload_buffer_full_optimized(canvas):
+def upload_buffer_full_optimized(canvas, n_timings=100_000):
     # Emulate updating a pretty big buffer, replacing full data if possible
 
     data1 = np.zeros((N,), np.uint8)
@@ -53,7 +54,7 @@ def upload_buffer_full_optimized(canvas):
 
     yield
 
-    while True:
+    for _ in range(n_timings + 2):
         if hasattr(buffer, "set_data"):
             buffer.set_data(data2)
             buffer.update_full()
@@ -62,10 +63,11 @@ def upload_buffer_full_optimized(canvas):
             buffer.update_range()
         update_resource(buffer)
         yield
+    del buffer
 
 
 @benchmark(20)
-def upload_buffer_full_noncont(canvas):
+def upload_buffer_full_noncont(canvas, n_timings=100_000):
     # Emulate updating a pretty big buffer
 
     data1 = np.zeros((N * 2,), np.uint8)[::2]
@@ -77,7 +79,7 @@ def upload_buffer_full_noncont(canvas):
 
     yield
 
-    while True:
+    for _ in range(n_timings + 2):
         if hasattr(buffer, "set_data"):
             buffer.set_data(data1)
         else:
@@ -85,10 +87,11 @@ def upload_buffer_full_noncont(canvas):
             buffer.update_range()
         update_resource(buffer)
         yield
+    del buffer
 
 
 @benchmark(20)
-def upload_buffer_half(canvas):
+def upload_buffer_half(canvas, n_timings=100_000):
     # Emulate updating a pretty big buffer
 
     data1 = np.zeros((N), np.uint8)
@@ -100,8 +103,7 @@ def upload_buffer_half(canvas):
 
     yield
 
-    while True:
-
+    for _ in range(n_timings + 2):
         buffer.data[: N // 2] = data1[: N // 2]
         buffer.update_range(0, N // 2)
 
@@ -109,10 +111,11 @@ def upload_buffer_half(canvas):
 
         update_resource(buffer)
         yield
+    del buffer
 
 
 @benchmark(20)
-def upload_buffer_two_quarters(canvas):
+def upload_buffer_two_quarters(canvas, n_timings=100_000):
     # Emulate updating a pretty big buffer
 
     data1 = np.zeros((N,), np.uint8)
@@ -124,7 +127,7 @@ def upload_buffer_two_quarters(canvas):
 
     yield
 
-    while True:
+    for _ in range(n_timings + 2):
         buffer.data[: N // 4] = data1[: N // 4]
         buffer.update_range(0, N // 4)
         buffer.data[-N // 4 :] = data1[-N // 4 :]
@@ -134,10 +137,11 @@ def upload_buffer_two_quarters(canvas):
 
         update_resource(buffer)
         yield
+    del buffer
 
 
 @benchmark(20)
-def upload_buffer_chunk_stripes(canvas):
+def upload_buffer_chunk_stripes(canvas, n_timings=100_000):
     # Emulate the worst-case stripe scenario
 
     data1 = np.zeros((N,), np.uint8)
@@ -151,15 +155,16 @@ def upload_buffer_chunk_stripes(canvas):
 
     yield
 
-    while True:
+    for _ in range(n_timings + 2):
         # buffer.data[::n] = data1[::n]
         buffer.update_indices(np.arange(0, N, step))
 
         update_resource(buffer)
         yield
+    del buffer
 
 
-def upload_buffer_random(n_random):
+def upload_buffer_random(n_random, n_timings=100_000):
 
     data1 = np.zeros((N,), np.uint8)
 
@@ -169,66 +174,68 @@ def upload_buffer_random(n_random):
 
     yield
 
-    while True:
+    for _ in range(n_timings + 2):
         ii = np.random.randint(0, N, n_random)
         # tex.data[ii] = 1
         buffer.update_indices(ii)
         update_resource(buffer)
         yield
+    del buffer
 
 
 @benchmark(20)
-def upload_buffer_random8(canvas):
-    return upload_buffer_random(8)
+def upload_buffer_random8(canvas, n_timings=100_000):
+    return upload_buffer_random(8, n_timings=n_timings)
 
 
 @benchmark(20)
-def upload_buffer_random16(canvas):
-    return upload_buffer_random(16)
+def upload_buffer_random16(canvas, n_timings=100_000):
+    return upload_buffer_random(16, n_timings=n_timings)
 
 
 @benchmark(20)
-def upload_buffer_random32(canvas):
-    return upload_buffer_random(32)
+def upload_buffer_random32(canvas, n_timings=100_000):
+    return upload_buffer_random(32, n_timings=n_timings)
 
 
 @benchmark(20)
-def upload_buffer_random64(canvas):
-    return upload_buffer_random(64)
+def upload_buffer_random64(canvas, n_timings=100_000):
+    return upload_buffer_random(64, n_timings=n_timings)
 
 
 @benchmark(20)
-def upload_buffer_random128(canvas):
-    return upload_buffer_random(128)
+def upload_buffer_random128(canvas, n_timings=100_000):
+    return upload_buffer_random(128, n_timings=n_timings)
 
 
 @benchmark(20)
-def upload_buffer_random256(canvas):
-    return upload_buffer_random(256)
+def upload_buffer_random256(canvas, n_timings=100_000):
+    return upload_buffer_random(256, n_timings=n_timings)
 
 
 @benchmark(20)
-def upload_buffer_random512(canvas):
-    return upload_buffer_random(512)
+def upload_buffer_random512(canvas, n_timings=100_000):
+    return upload_buffer_random(512, n_timings=n_timings)
 
 
 @benchmark(20)
-def upload_v_random1024(canvas):
-    return upload_buffer_random(1024)
+def upload_v_random1024(canvas, n_timings=100_000):
+    return upload_buffer_random(1024, n_timings=n_timings)
 
 
 @benchmark(20)
-def upload_buffer_random2048(canvas):
-    return upload_buffer_random(2048)
+def upload_buffer_random2048(canvas, n_timings=100_000):
+    return upload_buffer_random(2048, n_timings=n_timings)
 
 
 @benchmark(20)
-def upload_buffer_random4096(canvas):
-    return upload_buffer_random(4096)
+def upload_buffer_random4096(canvas, n_timings=100_000):
+    return upload_buffer_random(4096, n_timings=n_timings)
 
 
 @benchmark(20)
-def upload_100_buffers(canvas):
+def upload_100_buffers(canvas, n_timings=100_000):
+    print(n_timings)
     # This emulates updating a bunch of uniform buffers
 
     buffers = []
@@ -244,12 +251,12 @@ def upload_100_buffers(canvas):
 
     yield
 
-    while True:
-
+    for _ in range(n_timings + 2):
         for buffer in buffers:
             buffer.update_range()
             update_resource(buffer)
         yield
+    del buffer
 
 
 if __name__ == "__main__":
