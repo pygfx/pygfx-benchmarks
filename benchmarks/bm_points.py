@@ -14,6 +14,8 @@ twenty_clipping_planes = rng.random((20, 4), dtype="float32").tolist()
 
 
 def benchmark_points(canvas, n_objects, n_verts, *, clipping_planes=None):
+    if clipping_planes is None:
+        clipping_planes = []
 
     renderer = gfx.WgpuRenderer(canvas, blend_mode="ordered2")
     renderer.measure_gpu_times = True
