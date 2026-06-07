@@ -1,0 +1,18 @@
+FlatScene() construction -- pure CPU, no GPU
+
+flat_500                 median=    282.40 us
+flat_2000                median=   1160.69 us
+flat_5000                median=   2996.71 us
+flat_10000               median=   6900.27 us
+grouped_50x10            median=    290.48 us
+grouped_200x10           median=   1207.38 us
+grouped_500x10           median=   3082.85 us
+deep_50                  median=     38.12 us
+deep_200                 median=    141.31 us
+deep_500                 median=    366.42 us
+
+Full-render control (no-regression; traversal saving is below the render noise floor)
+
+              render_flat_5000 (10x) - cpu: 50.27 ms
+         render_grouped_500x10 (10x) - cpu: 39.42 ms
+               render_deep_200 (10x) - cpu:  3.04 ms

@@ -1,0 +1,15 @@
+### 0-main (8298401)
+moving-camera :    74423.9 us
+no-camera     :    35543.2 us
+### 1-scene-index (07f9673)
+moving-camera :    67965.8 us
+no-camera     :    25380.4 us
+### 2-vectorize (d9bf074)
+moving-camera :    35620.8 us
+no-camera     :    26895.0 us
+### 3-cache (5b5c774)
+moving-camera :     6880.3 us
+no-camera     :     4055.1 us
+### 4-skip-id (1ba5948)
+moving-camera :     4739.6 us
+no-camera     :     4306.8 us

@@ -1,0 +1,15 @@
+### 0-main
+moving-camera :   439336.1 us
+no-camera     :   179202.6 us
+### 1-scene-index
+moving-camera :   388940.8 us
+no-camera     :   150986.2 us
+### 2-vectorize
+moving-camera :   210739.0 us
+no-camera     :   163416.4 us
+### 3-cache
+moving-camera :    52549.2 us
+no-camera     :    28997.8 us
+### 4-skip-id
+moving-camera :    31240.4 us
+no-camera     :    29749.0 us
