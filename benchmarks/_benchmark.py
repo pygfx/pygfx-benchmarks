@@ -22,6 +22,12 @@ def benchmark(func):
 
     def outer(func):
 
+        # inspect the function, if it has an attribute called n_timings
+        # pass the function to outer
+        import inspect
+        import functools
+
+        @functools.wraps(func)
         def inner(*args):
 
             # Do somewhat of a reset
@@ -30,7 +36,11 @@ def benchmark(func):
                 time.sleep(0.02)
 
             # Boot the generator.
-            generator = func(*args)
+            if "n_timings" in inspect.getfullargspec(func).args:
+                kwargs = {"n_timings": n_timings}
+            else:
+                kwargs = {}
+            generator = func(*args, **kwargs)
 
             # Seed: the generator does its preparations.
             generator.__next__()
@@ -76,7 +86,6 @@ def benchmark(func):
             # print([t / 1000_000  for t in times["cpu"]])
             print(f"{name.rjust(30)} ({n_timings}x) - {stats_str}")
 
-        inner.__name__ == func.__name__
         inner.is_benchmark = True
         return inner
 
